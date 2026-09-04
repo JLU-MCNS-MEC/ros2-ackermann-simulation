@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <world name="line_track">
+    <!-- Use Gazebo's default physics engine (DART on this ROS/Gazebo pairing). -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 8 0 0 0</pose>
+      <diffuse>0.95 0.95 0.95 1</diffuse>
+      <specular>0.25 0.25 0.25 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode><mu>1.5</mu><mu2>1.5</mu2></ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.78 0.78 0.78 1</ambient>
+            <diffuse>0.78 0.78 0.78 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- A rounded rectangle made from overlapping visual-only segments.  The
+         1 m corner radius is within the steering envelope of this car, and
+         the single marking model makes it easy to replace the track later. -->
+    <model name="line_track_marking">
+      <static>true</static>
+      <link name="link">
+        <visual name="entry">
+          <pose>-2.2 0 0.002 0 0 0</pose>
+          <geometry><box><size>2.08 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_straight">
+          <pose>-0.3 0 0.002 0 0 0</pose>
+          <geometry><box><size>1.88 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_0">
+          <pose>0.729 0.017 0.002 0 0 0.131</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_1">
+          <pose>0.979 0.084 0.002 0 0 0.393</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_2">
+          <pose>1.204 0.213 0.002 0 0 0.654</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_3">
+          <pose>1.387 0.396 0.002 0 0 0.916</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_4">
+          <pose>1.516 0.621 0.002 0 0 1.178</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_right_5">
+          <pose>1.583 0.871 0.002 0 0 1.440</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="right_straight">
+          <pose>1.6 1.4 0.002 0 0 1.571</pose>
+          <geometry><box><size>0.88 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_0">
+          <pose>1.583 1.929 0.002 0 0 1.702</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_1">
+          <pose>1.516 2.179 0.002 0 0 1.963</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_2">
+          <pose>1.387 2.404 0.002 0 0 2.225</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_3">
+          <pose>1.204 2.587 0.002 0 0 2.487</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_4">
+          <pose>0.979 2.716 0.002 0 0 2.749</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_right_5">
+          <pose>0.729 2.783 0.002 0 0 3.011</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_straight">
+          <pose>-0.3 2.8 0.002 0 0 3.142</pose>
+          <geometry><box><size>1.88 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_0">
+          <pose>-1.329 2.783 0.002 0 0 3.272</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_1">
+          <pose>-1.579 2.716 0.002 0 0 3.534</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_2">
+          <pose>-1.804 2.587 0.002 0 0 3.796</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_3">
+          <pose>-1.987 2.404 0.002 0 0 4.058</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_4">
+          <pose>-2.116 2.179 0.002 0 0 4.320</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="top_left_5">
+          <pose>-2.183 1.929 0.002 0 0 4.581</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="left_straight">
+          <pose>-2.2 1.4 0.002 0 0 -1.571</pose>
+          <geometry><box><size>0.88 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_0">
+          <pose>-2.183 0.871 0.002 0 0 4.843</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_1">
+          <pose>-2.116 0.621 0.002 0 0 5.105</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_2">
+          <pose>-1.987 0.396 0.002 0 0 5.367</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_3">
+          <pose>-1.804 0.213 0.002 0 0 5.629</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_4">
+          <pose>-1.579 0.084 0.002 0 0 5.890</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+        <visual name="bottom_left_5">
+          <pose>-1.329 0.017 0.002 0 0 6.152</pose>
+          <geometry><box><size>0.341 0.14 0.004</size></box></geometry>
+          <material><ambient>0.015 0.015 0.015 1</ambient><diffuse>0.015 0.015 0.015 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

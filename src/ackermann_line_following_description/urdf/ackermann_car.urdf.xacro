@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<robot name="ackermann_car" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Keep these dimensions in one place so another chassis can reuse the controller. -->
+  <xacro:property name="pi_value" value="3.141592653589793"/>
+  <xacro:property name="wheel_radius" value="0.09"/>
+  <xacro:property name="wheel_width" value="0.06"/>
+  <xacro:property name="wheel_base" value="0.56"/>
+  <xacro:property name="wheel_separation" value="0.54"/>
+  <xacro:property name="kingpin_width" value="0.50"/>
+  <xacro:property name="front_x" value="0.28"/>
+  <xacro:property name="rear_x" value="-0.28"/>
+  <xacro:property name="wheel_y" value="0.27"/>
+  <xacro:property name="wheel_z" value="-0.07"/>
+  <xacro:property name="base_height" value="0.16"/>
+
+  <material name="chassis_blue">
+    <color rgba="0.08 0.25 0.75 1.0"/>
+  </material>
+  <material name="wheel_black">
+    <color rgba="0.03 0.03 0.03 1.0"/>
+  </material>
+  <material name="steering_metal">
+    <color rgba="0.55 0.58 0.62 1.0"/>
+  </material>
+  <material name="sensor_black">
+    <color rgba="0.02 0.02 0.02 1.0"/>
+  </material>
+
+  <xacro:macro name="box_inertial" params="mass x y z">
+    <inertial>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * (y * y + z * z) / 12.0}"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="${mass * (x * x + z * z) / 12.0}"
+        iyz="0.0"
+        izz="${mass * (x * x + y * y) / 12.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="wheel_link" params="name">
+    <link name="${name}">
+      <xacro:cylinder_inertial mass="0.12" radius="${wheel_radius}" length="${wheel_width}"/>
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi_value / 2.0} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="wheel_black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi_value / 2.0} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertial" params="mass radius length">
+    <inertial>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * (3.0 * radius * radius + length * length) / 12.0}"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="${mass * (3.0 * radius * radius + length * length) / 12.0}"
+        iyz="0.0"
+        izz="${mass * radius * radius / 2.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Root frame is at ground level, which makes odometry and model replacement predictable. -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <xacro:box_inertial mass="1.5" x="0.80" y="0.48" z="0.14"/>
+    <visual>
+      <geometry>
+        <box size="0.80 0.48 0.14"/>
+      </geometry>
+      <material name="chassis_blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.80 0.48 0.14"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${base_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Rear axle: rear-wheel drive. -->
+  <xacro:wheel_link name="rear_left_wheel"/>
+  <xacro:wheel_link name="rear_right_wheel"/>
+
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="${rear_x} ${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="50"/>
+    <dynamics damping="0.15" friction="0.02"/>
+  </joint>
+
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="${rear_x} -${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="50"/>
+    <dynamics damping="0.15" friction="0.02"/>
+  </joint>
+
+  <!-- Front axle: each kingpin has an independent steering joint for Ackermann geometry. -->
+  <link name="front_left_steering_link">
+    <xacro:cylinder_inertial mass="0.04" radius="0.025" length="0.08"/>
+    <visual>
+      <geometry>
+        <cylinder radius="0.025" length="0.08"/>
+      </geometry>
+      <material name="steering_metal"/>
+    </visual>
+  </link>
+  <link name="front_right_steering_link">
+    <xacro:cylinder_inertial mass="0.04" radius="0.025" length="0.08"/>
+    <visual>
+      <geometry>
+        <cylinder radius="0.025" length="0.08"/>
+      </geometry>
+      <material name="steering_metal"/>
+    </visual>
+  </link>
+
+  <joint name="front_left_steering_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_left_steering_link"/>
+    <origin xyz="${front_x} ${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.55" upper="0.55" effort="80" velocity="5"/>
+    <dynamics damping="0.8" friction="0.05"/>
+  </joint>
+
+  <joint name="front_right_steering_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_right_steering_link"/>
+    <origin xyz="${front_x} -${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.55" upper="0.55" effort="80" velocity="5"/>
+    <dynamics damping="0.8" friction="0.05"/>
+  </joint>
+
+  <xacro:wheel_link name="front_left_wheel"/>
+  <xacro:wheel_link name="front_right_wheel"/>
+
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="front_left_steering_link"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="50"/>
+    <dynamics damping="0.15" friction="0.02"/>
+  </joint>
+
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="front_right_steering_link"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="50"/>
+    <dynamics damping="0.15" friction="0.02"/>
+  </joint>
+
+  <!-- A small forward/downward-facing RGB camera supplies the line image. -->
+  <link name="camera_link">
+    <xacro:box_inertial mass="0.03" x="0.06" y="0.06" z="0.04"/>
+    <visual>
+      <geometry>
+        <box size="0.06 0.06 0.04"/>
+      </geometry>
+      <material name="sensor_black"/>
+    </visual>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <!-- Gazebo cameras look along +X at zero pitch; pitch down to keep the line
+         in view while retaining enough look-ahead for steering. -->
+    <origin xyz="0.31 0 0.19" rpy="0 0.85 0"/>
+  </joint>
+
+  <gazebo reference="rear_left_wheel">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+  <gazebo reference="rear_right_wheel">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+  <gazebo reference="front_left_wheel">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+  <gazebo reference="front_right_wheel">
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor name="front_camera" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <topic>/camera/image_raw</topic>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>360</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>20.0</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <!-- Gazebo Sim's native Ackermann system is model-name agnostic at runtime. -->
+  <gazebo>
+    <plugin filename="gz-sim-ackermann-steering-system" name="gz::sim::systems::AckermannSteering">
+      <left_joint>front_left_wheel_joint</left_joint>
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>front_right_wheel_joint</right_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <left_steering_joint>front_left_steering_joint</left_steering_joint>
+      <right_steering_joint>front_right_steering_joint</right_steering_joint>
+      <kingpin_width>${kingpin_width}</kingpin_width>
+      <steering_limit>0.55</steering_limit>
+      <wheel_base>${wheel_base}</wheel_base>
+      <wheel_separation>${wheel_separation}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <steer_p_gain>1000</steer_p_gain>
+      <steer_d_gain>10</steer_d_gain>
+      <min_velocity>-0.6</min_velocity>
+      <max_velocity>0.6</max_velocity>
+      <min_acceleration>-1.5</min_acceleration>
+      <max_acceleration>1.5</max_acceleration>
+      <odom_publish_frequency>30</odom_publish_frequency>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+    </plugin>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+  </gazebo>
+
+</robot>
