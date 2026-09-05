@@ -1,0 +1,79 @@
+{
+  "passed": false,
+  "topics": {
+    "/scan": {
+      "frame": "lidar_link",
+      "samples": 720,
+      "count": 196,
+      "sim_hz": 10.000000000000004,
+      "wall_hz": 9.793832635848407,
+      "monotonic": true,
+      "expected_m": 3.0,
+      "mean_m": 3.0008549094200134,
+      "std_m": 0.010492132463009151,
+      "absolute_error_m": 0.0008549094200134277,
+      "data_passed": true,
+      "minimum_wall_hz": 9.0,
+      "rate_passed": true,
+      "passed": true
+    },
+    "/rgbd/image": {
+      "frame": "rgbd_optical_frame",
+      "size": [
+        640,
+        480
+      ],
+      "count": 138,
+      "sim_hz": 7.012694512694512,
+      "wall_hz": 6.866257090317457,
+      "monotonic": true,
+      "data_passed": true,
+      "minimum_wall_hz": 12.0,
+      "rate_passed": false,
+      "passed": false
+    },
+    "/rgbd/depth_image": {
+      "frame": "rgbd_optical_frame",
+      "encoding": "32FC1",
+      "valid_fraction": 1.0,
+      "count": 221,
+      "sim_hz": 11.299435028248588,
+      "wall_hz": 11.048343433146211,
+      "monotonic": true,
+      "expected_m": 2.64,
+      "mean_m": 2.640000343322754,
+      "std_m": 0.0,
+      "absolute_error_m": 3.43322753781905e-07,
+      "data_passed": true,
+      "minimum_wall_hz": 12.0,
+      "rate_passed": false,
+      "passed": false
+    },
+    "/rgbd/camera_info": {
+      "frame": "rgbd_optical_frame",
+      "count": 298,
+      "sim_hz": 15.15151515151516,
+      "wall_hz": 14.820036774807122,
+      "monotonic": true,
+      "data_passed": true,
+      "minimum_wall_hz": 12.0,
+      "rate_passed": true,
+      "passed": true
+    },
+    "/rgbd/points": {
+      "frame": "rgbd_optical_frame",
+      "size": [
+        640,
+        480
+      ],
+      "count": 181,
+      "sim_hz": 9.27643784786642,
+      "wall_hz": 9.06598191402106,
+      "monotonic": true,
+      "data_passed": true,
+      "minimum_wall_hz": 12.0,
+      "rate_passed": false,
+      "passed": false
+    }
+  }
+}

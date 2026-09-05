@@ -1,5 +1,7 @@
 # Ackermann 小车循迹仿真
 
+新增雷达、前向 RGB-D 与静态测距场景，详见 [感知测试与导航路线](docs/perception_navigation.md)。
+
 这是一个面向 Ubuntu 24.04 的 ROS 2 Jazzy + Gazebo Harmonic 示例。车辆模型、赛道、桥接和循迹控制分开，后续替换车型时不需要重写循迹节点。
 
 ## 启动

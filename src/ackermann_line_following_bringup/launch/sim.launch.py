@@ -5,6 +5,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
@@ -100,12 +101,19 @@ def generate_launch_description() -> LaunchDescription:
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
             '/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+            '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+            '/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
+            '/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+            '/rgbd/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+            ['/model/', entity_name, '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
             command_bridge_topic,
             odometry_bridge_topic,
             joint_state_bridge_topic,
         ],
         remappings=[
             (joint_state_topic, '/joint_states'),
+            (['/model/', entity_name, '/tf'], '/tf'),
         ],
         output='screen',
     )
@@ -128,6 +136,7 @@ def generate_launch_description() -> LaunchDescription:
     )
 
     line_follower = Node(
+        condition=IfCondition(LaunchConfiguration('enable_line_follower')),
         package='ackermann_line_following_controller',
         executable='line_follower',
         name='line_follower',
@@ -163,6 +172,7 @@ def generate_launch_description() -> LaunchDescription:
                 description='Arguments passed to Gazebo Sim; use -s for headless mode.',
             ),
             DeclareLaunchArgument('start_x', default_value='-2.8'),
+            DeclareLaunchArgument('enable_line_follower', default_value='true'),
             DeclareLaunchArgument('start_y', default_value='0.0'),
             DeclareLaunchArgument('start_z', default_value='0.02'),
             DeclareLaunchArgument(
