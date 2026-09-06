@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Lidar1
+        - /Trajectory1
         - /RGBD PointCloud1
       Splitter Ratio: 0.45
   - Class: rviz_common/Views
@@ -94,6 +95,22 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Update Interval: 0
+      Value: true
+    - Class: rviz_default_plugins/Path
+      Color: 255; 220; 40
+      Enabled: true
+      Name: Trajectory
+      Topic: /trajectory
+      Value: true
+      Line Style: Lines
+      Line Width: 0.04
+      Buffer Length: 1
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Waypoint Target
+      Namespaces:
+        waypoint_tracker: true
+      Topic: /waypoint_target
       Value: true
   Enabled: true
   Global Options:

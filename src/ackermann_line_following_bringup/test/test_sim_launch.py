@@ -14,4 +14,13 @@ def test_sim_launch_exposes_stationary_mode():
     description = module.generate_launch_description()
     names = {entity.name for entity in description.entities
              if isinstance(entity, DeclareLaunchArgument)}
-    assert {'enable_line_follower', 'start_x', 'start_y', 'gz_args'} <= names
+    assert {
+        'enable_line_follower',
+        'enable_waypoint_nav',
+        'start_x',
+        'start_y',
+        'gz_args',
+        'target_speed',
+        'waypoint_file',
+        'world_name',
+    } <= names
