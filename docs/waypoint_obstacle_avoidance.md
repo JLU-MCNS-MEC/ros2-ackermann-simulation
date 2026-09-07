@@ -126,7 +126,7 @@ ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=complex_static use_rviz:=true
 ```
 
-`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan_nav`、`/scan/points`、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；Nav2 启动时关闭未参与导航的 RGB-D 渲染。动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。MID-360 点云使用 RViz `AxisColor` 按 Z 高度着色，点尺寸为 3 像素并保留 0.25 秒衰减，便于观察垂直层；实车接入 Livox 驱动时可改回官方常用的强度彩虹色。
+`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan_nav`、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；Nav2 启动时关闭未参与导航的 RGB-D 渲染。动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。原始 MID-360 点云先由 `pcl_ros` 按 Z 高度滤除地面，再以 `/scan/points_obstacles` 供 RViz 显示；导航 VoxelLayer 仍直接接收原始点云并执行自己的高度裁剪。点云使用 RViz `AxisColor` 按 Z 高度着色，点尺寸为 3 像素并保留 0.25 秒衰减，便于观察垂直层；实车接入 Livox 驱动时可改回官方常用的强度彩虹色。
 
 ## 开源路线与下一步
 
