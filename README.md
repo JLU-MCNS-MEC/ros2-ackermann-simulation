@@ -27,10 +27,10 @@ ros2 launch ackermann_line_following_bringup sim.launch.py line_speed:=0.10
 
 ```bash
 ros2 launch ackermann_line_following_bringup nav2_waypoint_nav.launch.py \
-  send_waypoints:=true use_rviz:=true
+  send_waypoints:=true use_rviz:=true use_rqt_plots:=true
 ```
 
-导航启动会关闭视觉循迹和未使用的 RGB-D 渲染，确保只有 Nav2 向底盘发布速度。MID-360 PointCloud2 直接进入全局和局部 VoxelLayer，并投影为 `/scan_nav` 供 Collision Monitor 使用。默认场景在不含内部障碍的地图上感知 Gazebo 中的未知箱体，绕行后在终点停车；传感器、TF、故障定位和开源方案比较见 [感知测试与导航路线](docs/perception_navigation.md)。
+导航启动会关闭视觉循迹和未使用的 RGB-D 渲染，确保只有 Nav2 向底盘发布速度。MID-360 PointCloud2 直接进入全局和局部 VoxelLayer，并投影为 `/scan_nav` 供 Collision Monitor 使用。`use_rqt_plots:=true` 会打开实时速度曲线和导航判断曲线，RViz 车体上方同步显示速度、转角、障碍距离、路径误差和安全动作。默认场景在不含内部障碍的地图上感知 Gazebo 中的未知箱体，绕行后在终点停车；传感器、TF、故障定位和开源方案比较见 [感知测试与导航路线](docs/perception_navigation.md)。
 
 完整的前进、倒车、刹车和转向验收，以及短直线、已知障碍、未知障碍和偏置终点四种静态地图场景，见 [Nav2 轨迹点与激光避障说明](docs/waypoint_obstacle_avoidance.md)。动力学测试会把实际模型里程计写入 `/tmp/ackermann_dynamics_result.json`，并在 RViz 显示实测轨迹。
 

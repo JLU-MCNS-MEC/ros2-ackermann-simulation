@@ -26,6 +26,8 @@ setup(
             'waypoint_tracker = ackermann_line_following_controller.waypoint_tracker_node:main',
             'nav2_waypoint_sender = ackermann_line_following_controller.nav2_waypoint_sender:main',
             'ackermann_dynamics_test = ackermann_line_following_controller.dynamics_test_node:main',
+            'navigation_diagnostics = ackermann_line_following_controller.navigation_diagnostics_node:main',
+            'navigation_plotter = ackermann_line_following_controller.navigation_plotter:main',
         ],
     },
 )

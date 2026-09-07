@@ -70,8 +70,8 @@ def test_navigation_rviz_uses_best_effort_projected_scan():
     lidar_start = config.index('Name: Lidar')
     lidar_end = config.index('Name: RGBD PointCloud')
     lidar_config = config[lidar_start:lidar_end]
-    assert 'Topic: /scan_nav' in lidar_config
-    assert 'Unreliable: true' in lidar_config
+    assert 'Value: /scan_nav' in lidar_config
+    assert 'Reliability Policy: Best Effort' in lidar_config
 
 
 def test_nav2_launch_uses_open_source_navigation_stack():
@@ -82,7 +82,14 @@ def test_nav2_launch_uses_open_source_navigation_stack():
     description = module.generate_launch_description()
     names = {entity.name for entity in description.entities
              if isinstance(entity, DeclareLaunchArgument)}
-    assert {'waypoint_file', 'send_waypoints', 'use_rviz', 'entity_name'} <= names
+    assert {
+        'waypoint_file',
+        'send_waypoints',
+        'use_rviz',
+        'use_diagnostics',
+        'use_rqt_plots',
+        'entity_name',
+    } <= names
 
     launch_text = path.read_text(encoding='utf-8')
     assert "package='pointcloud_to_laserscan'" in launch_text
@@ -151,5 +158,21 @@ def test_static_scenario_launch_exposes_scenario_selector():
         'send_waypoints',
         'use_rviz',
         'target_speed',
+        'use_diagnostics',
+        'use_rqt_plots',
         'gz_args',
     } <= names
+
+
+def test_navigation_launch_wires_diagnostics_and_live_plots():
+    """Navigation launch includes telemetry, plots and its RViz marker."""
+    bringup_dir = Path(__file__).parents[1]
+    launch_text = (
+        bringup_dir / 'launch' / 'nav2_waypoint_nav.launch.py'
+    ).read_text(encoding='utf-8')
+    rviz = (bringup_dir / 'rviz' / 'perception.rviz').read_text(
+        encoding='utf-8'
+    )
+    assert "executable='navigation_diagnostics'" in launch_text
+    assert "executable='navigation_plotter'" in launch_text
+    assert 'Topic: /nav_diagnostics/summary' in rviz

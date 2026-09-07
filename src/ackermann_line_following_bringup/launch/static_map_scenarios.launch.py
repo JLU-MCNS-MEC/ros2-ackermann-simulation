@@ -18,6 +18,8 @@ def _scenario_launch(context, *args, **kwargs):
     send_waypoints = LaunchConfiguration('send_waypoints')
     use_rviz = LaunchConfiguration('use_rviz')
     target_speed = LaunchConfiguration('target_speed')
+    use_diagnostics = LaunchConfiguration('use_diagnostics')
+    use_rqt_plots = LaunchConfiguration('use_rqt_plots')
     external_gz_args = LaunchConfiguration('gz_args').perform(context).strip()
 
     bringup_share = get_package_share_directory('ackermann_line_following_bringup')
@@ -65,6 +67,8 @@ def _scenario_launch(context, *args, **kwargs):
                 'target_speed': target_speed,
                 'send_waypoints': send_waypoints,
                 'use_rviz': use_rviz,
+                'use_diagnostics': use_diagnostics,
+                'use_rqt_plots': use_rqt_plots,
             }.items(),
         )
     ]
@@ -97,9 +101,23 @@ def generate_launch_description() -> LaunchDescription:
                 description='Desired speed passed to the Nav2 parameter set.',
             ),
             DeclareLaunchArgument(
+                'use_diagnostics',
+                default_value='true',
+                description=(
+                    'Publish navigation telemetry and the RViz summary.'
+                ),
+            ),
+            DeclareLaunchArgument(
+                'use_rqt_plots',
+                default_value='false',
+                description='Open live speed and decision curves.',
+            ),
+            DeclareLaunchArgument(
                 'gz_args',
                 default_value='',
-                description='Optional Gazebo arguments; empty selects the scenario world.',
+                description=(
+                    'Optional Gazebo arguments; empty selects the scenario world.'
+                ),
             ),
             OpaqueFunction(function=_scenario_launch),
         ]

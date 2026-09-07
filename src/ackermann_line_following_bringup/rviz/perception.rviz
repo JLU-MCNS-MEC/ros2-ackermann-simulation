@@ -94,8 +94,13 @@ Visualization Manager:
       Queue Size: 10
       Size (Pixels): 3
       Style: Flat Squares
-      Topic: /scan_nav
-      Unreliable: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /scan_nav
       Use Fixed Frame: true
       Value: true
     - Alpha: 0.8
@@ -208,6 +213,13 @@ Visualization Manager:
       Enabled: true
       Name: Collision Slow Zone
       Topic: /polygon_slowdown
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Navigation Diagnostics
+      Namespaces:
+        navigation_diagnostics: true
+      Topic: /nav_diagnostics/summary
       Value: true
   Enabled: true
   Global Options:

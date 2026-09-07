@@ -194,6 +194,22 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{'use_sim_time': True}],
     )
 
+    diagnostics = Node(
+        condition=IfCondition(LaunchConfiguration('use_diagnostics')),
+        package='ackermann_line_following_controller',
+        executable='navigation_diagnostics',
+        name='navigation_diagnostics',
+        output='screen',
+        parameters=[{'use_sim_time': True}],
+    )
+    navigation_plots = Node(
+        condition=IfCondition(LaunchConfiguration('use_rqt_plots')),
+        package='ackermann_line_following_controller',
+        executable='navigation_plotter',
+        name='navigation_plotter',
+        output='screen',
+    )
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -240,6 +256,18 @@ def generate_launch_description() -> LaunchDescription:
                 default_value='false',
                 description='Start RViz with the perception and Nav2 displays.',
             ),
+            DeclareLaunchArgument(
+                'use_diagnostics',
+                default_value='true',
+                description=(
+                    'Publish scalar navigation telemetry and an RViz summary.'
+                ),
+            ),
+            DeclareLaunchArgument(
+                'use_rqt_plots',
+                default_value='false',
+                description='Open live speed and navigation decision plots.',
+            ),
             sim,
             map_to_odom,
             map_server,
@@ -247,6 +275,8 @@ def generate_launch_description() -> LaunchDescription:
             lidar_scan_projection,
             navigation,
             route_sender,
+            diagnostics,
             rviz,
+            navigation_plots,
         ]
     )
