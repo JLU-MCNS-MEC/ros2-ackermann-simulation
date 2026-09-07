@@ -51,6 +51,17 @@ def test_sim_launch_uses_mid360_scan_and_pointcloud_bridge():
     )
 
 
+def test_rviz_configs_color_mid360_points_by_height():
+    bringup_dir = Path(__file__).parents[1]
+    for config_name in ('dynamics.rviz', 'perception.rviz'):
+        config = (bringup_dir / 'rviz' / config_name).read_text(
+            encoding='utf-8'
+        )
+        assert 'Name: MID360 PointCloud' in config
+        assert 'Color Transformer: AxisColor' in config
+        assert 'Topic: /scan/points' in config
+
+
 def test_nav2_launch_uses_open_source_navigation_stack():
     path = Path(__file__).parents[1] / 'launch' / 'nav2_waypoint_nav.launch.py'
     spec = importlib.util.spec_from_file_location('nav2_launch', path)
