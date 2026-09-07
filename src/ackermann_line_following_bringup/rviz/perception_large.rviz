@@ -89,7 +89,7 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz_default_plugins/LaserScan
       Color: 255; 40; 40
-      Enabled: true
+      Enabled: false
       Name: Lidar
       Queue Size: 10
       Size (Pixels): 3
@@ -102,7 +102,7 @@ Visualization Manager:
         Reliability Policy: Best Effort
         Value: /scan_nav
       Use Fixed Frame: true
-      Value: true
+      Value: false
     - Alpha: 0.8
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
