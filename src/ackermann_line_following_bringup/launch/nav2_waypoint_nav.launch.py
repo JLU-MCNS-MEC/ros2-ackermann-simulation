@@ -209,6 +209,20 @@ def generate_launch_description() -> LaunchDescription:
         name='navigation_plotter',
         output='screen',
     )
+    experiment = Node(
+        condition=IfCondition(LaunchConfiguration('record_experiment')),
+        package='ackermann_line_following_controller',
+        executable='navigation_experiment',
+        name='navigation_experiment',
+        output='screen',
+        parameters=[
+            {
+                'use_sim_time': True,
+                'scenario': LaunchConfiguration('experiment_name'),
+                'result_file': LaunchConfiguration('experiment_result_file'),
+            }
+        ],
+    )
 
     return LaunchDescription(
         [
@@ -268,6 +282,21 @@ def generate_launch_description() -> LaunchDescription:
                 default_value='false',
                 description='Open live speed and navigation decision plots.',
             ),
+            DeclareLaunchArgument(
+                'record_experiment',
+                default_value='false',
+                description='Record route samples and aggregate metrics.',
+            ),
+            DeclareLaunchArgument(
+                'experiment_name',
+                default_value='unnamed',
+                description='Scenario label stored in the experiment report.',
+            ),
+            DeclareLaunchArgument(
+                'experiment_result_file',
+                default_value='/tmp/ackermann_navigation_experiment.json',
+                description='JSON result path; CSV samples use the same stem.',
+            ),
             sim,
             map_to_odom,
             map_server,
@@ -278,5 +307,6 @@ def generate_launch_description() -> LaunchDescription:
             diagnostics,
             rviz,
             navigation_plots,
+            experiment,
         ]
     )

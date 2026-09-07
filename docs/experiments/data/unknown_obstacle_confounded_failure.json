@@ -1,0 +1,23 @@
+{
+  "scenario": "unknown_obstacle",
+  "outcome": "FAILED",
+  "success": false,
+  "duration_s": 96.254,
+  "sample_count": 963,
+  "distance_travelled_m": 19.09366629203966,
+  "mean_abs_cross_track_error_m": 0.03296184164786622,
+  "max_abs_cross_track_error_m": 0.0918710225903641,
+  "speed_tracking_rmse_mps": 0.009848032035405217,
+  "max_measured_speed_mps": 0.22017257772690316,
+  "minimum_front_clearance_m": 1.0439199209213257,
+  "minimum_nearest_clearance_m": 0.49959972500801086,
+  "final_goal_distance_m": 3.368306093437928,
+  "decision_transition_count": 4,
+  "decision_sample_counts": {
+    "CLEAR": 931,
+    "STOP": 0,
+    "SLOWDOWN": 32,
+    "APPROACH": 0,
+    "LIMIT": 0
+  }
+}
