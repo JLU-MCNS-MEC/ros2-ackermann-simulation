@@ -36,21 +36,36 @@ def _scenario_launch(context, *args, **kwargs):
             'nav2_short_straight.csv',
             'waypoint_obstacle.yaml',
             'waypoint_obstacle',
+            '-3.5',
+            '0.0',
         ),
         'offset': (
             'nav2_offset_goal.csv',
             'waypoint_obstacle.yaml',
             'waypoint_obstacle',
+            '-3.5',
+            '0.0',
         ),
         'obstacle': (
             'nav2_trajectory.csv',
             'waypoint_obstacle.yaml',
             'waypoint_obstacle',
+            '-3.5',
+            '0.0',
         ),
         'unknown_obstacle': (
             'nav2_unknown_obstacle.csv',
             'free_navigation.yaml',
             'unknown_obstacle',
+            '-3.5',
+            '0.0',
+        ),
+        'complex_static': (
+            'nav2_complex_static.csv',
+            'complex_static.yaml',
+            'complex_static',
+            '-13.0',
+            '-8.0',
         ),
     }
     if scenario not in scenarios:
@@ -59,8 +74,14 @@ def _scenario_launch(context, *args, **kwargs):
             f'Unknown static-map scenario {scenario!r}; choose: {available}'
         )
 
-    route_name, map_name, world_name = scenarios[scenario]
+    route_name, map_name, world_name, start_x, start_y = scenarios[scenario]
     world = os.path.join(description_share, 'worlds', f'{world_name}.sdf')
+    rviz_name = (
+        'perception_large.rviz'
+        if scenario == 'complex_static'
+        else 'perception.rviz'
+    )
+    rviz_config = os.path.join(bringup_share, 'rviz', rviz_name)
     route = os.path.join(controller_share, 'config', route_name)
     map_file = os.path.join(
         bringup_share, 'maps', map_name
@@ -77,6 +98,9 @@ def _scenario_launch(context, *args, **kwargs):
                 'map_file': map_file,
                 'gz_args': gz_args,
                 'waypoint_file': route,
+                'rviz_config': rviz_config,
+                'start_x': start_x,
+                'start_y': start_y,
                 'target_speed': target_speed,
                 'send_waypoints': send_waypoints,
                 'use_rviz': use_rviz,
@@ -98,7 +122,8 @@ def generate_launch_description() -> LaunchDescription:
                 'scenario',
                 default_value='unknown_obstacle',
                 description=(
-                    'One of straight, offset, obstacle or unknown_obstacle.'
+                    'One of straight, offset, obstacle, unknown_obstacle or '
+                    'complex_static.'
                 ),
             ),
             DeclareLaunchArgument(

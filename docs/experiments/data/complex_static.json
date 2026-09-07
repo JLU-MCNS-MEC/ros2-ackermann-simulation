@@ -1,0 +1,27 @@
+{
+  "scenario": "complex_static",
+  "outcome": "SUCCEEDED",
+  "success": true,
+  "duration_s": 230.463,
+  "sample_count": 2305,
+  "effective_sample_rate_hz": 10.001605463783775,
+  "time_to_first_command_s": 0.20099999999999962,
+  "time_to_first_motion_s": 0.30099999999999927,
+  "distance_travelled_m": 49.52368685561688,
+  "mean_abs_cross_track_error_m": 0.015487867033353215,
+  "max_abs_cross_track_error_m": 0.09100255115565413,
+  "speed_tracking_rmse_mps": 0.01002697744416745,
+  "max_measured_speed_mps": 0.22029467707539396,
+  "mean_measured_speed_mps": 0.2132548243357269,
+  "minimum_front_clearance_m": 1.0457743406295776,
+  "minimum_nearest_clearance_m": 0.6082977652549744,
+  "final_goal_distance_m": 0.2580753752031177,
+  "decision_transition_count": 6,
+  "decision_sample_counts": {
+    "CLEAR": 2302,
+    "STOP": 3,
+    "SLOWDOWN": 0,
+    "APPROACH": 0,
+    "LIMIT": 0
+  }
+}

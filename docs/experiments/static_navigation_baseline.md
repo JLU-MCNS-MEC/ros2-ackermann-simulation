@@ -13,6 +13,7 @@ JSON 汇总和同名 CSV 原始数据。
 | offset | 成功 | 31.75 | 6.52 | 0.010 / 0.039 | 0.0177 | 0.924 / 0.504 |
 | obstacle | 成功 | 34.52 | 7.19 | 0.012 / 0.065 | 0.0126 | 1.450 / 0.528 |
 | unknown_obstacle | 成功 | 35.84 | 7.24 | 0.013 / 0.060 | 0.0115 | 1.105 / 0.513 |
+| complex_static | 成功 | 230.46 | 49.52 | 0.015 / 0.091 | 0.0100 | 1.046 / 0.608 |
 
 四组有效结果保存在 [data](data/) 中。`unknown_obstacle` 最初复用了包含三个
 物体的点云展示世界，但静态地图为空，导致三个物体都成为未知障碍。车辆绕过
@@ -20,6 +21,11 @@ JSON 汇总和同名 CSV 原始数据。
 该失败样本保存在
 [unknown_obstacle_confounded_failure.json](data/unknown_obstacle_confounded_failure.json)。
 场景现已改用只包含中央箱体的 `unknown_obstacle.sdf`，复跑成功。
+
+大型 `complex_static` 场景为 30×20 m、600×400 栅格，包含边界墙、5 组
+交错货架和 3 个立柱。首次基线以 0.22 m/s 完成 9 个路线点，首条控制指令
+延迟 0.201 s，车辆起步延迟 0.301 s，有效采样频率 10.002 Hz。完整结果见
+[complex_static.json](data/complex_static.json)。
 
 ## 运行方法
 

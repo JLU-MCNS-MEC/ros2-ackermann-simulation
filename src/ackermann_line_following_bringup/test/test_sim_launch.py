@@ -149,6 +149,38 @@ def test_unknown_obstacle_world_contains_only_the_test_obstacle():
     assert 'right_obstacle' not in world
 
 
+def test_complex_static_scenario_has_large_aligned_map_and_route():
+    """Large performance scenario packages matching map, world and route."""
+    bringup_dir = Path(__file__).parents[1]
+    pgm = (bringup_dir / 'maps' / 'complex_static.pgm').read_bytes()
+    header, raster = pgm.split(b'255\n', maxsplit=1)
+    assert header.startswith(b'P5\n')
+    assert b'600 400' in header
+    assert len(raster) == 600 * 400
+    assert {0, 254} <= set(raster)
+
+    source_root = Path(__file__).parents[2]
+    world = (
+        source_root
+        / 'ackermann_line_following_description'
+        / 'worlds'
+        / 'complex_static.sdf'
+    ).read_text(encoding='utf-8')
+    route = (
+        source_root
+        / 'ackermann_line_following_controller'
+        / 'config'
+        / 'nav2_complex_static.csv'
+    ).read_text(encoding='utf-8')
+    assert '<world name="complex_static">' in world
+    assert 'shelf_a' in world and 'shelf_e' in world
+    assert '-13.0, -8.0' in route and '13.0, 8.0' in route
+    large_rviz = (
+        bringup_dir / 'rviz' / 'perception_large.rviz'
+    ).read_text(encoding='utf-8')
+    assert 'Distance: 24' in large_rviz
+
+
 def test_dynamics_launch_exposes_report_and_rviz_controls():
     path = Path(__file__).parents[1] / 'launch' / 'dynamics_test.launch.py'
     spec = importlib.util.spec_from_file_location('dynamics_launch', path)
@@ -193,4 +225,5 @@ def test_navigation_launch_wires_diagnostics_and_live_plots():
     assert "executable='navigation_diagnostics'" in launch_text
     assert "executable='navigation_plotter'" in launch_text
     assert "executable='navigation_experiment'" in launch_text
+    assert 'FollowPath.desired_linear_vel' in launch_text
     assert 'Topic: /nav_diagnostics/summary' in rviz

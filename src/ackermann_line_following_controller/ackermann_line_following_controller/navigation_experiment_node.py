@@ -135,6 +135,22 @@ class ExperimentAccumulator:
         measured_speed = self._finite([
             abs(sample.measured_speed_mps) for sample in self.samples
         ])
+        first_command = next(
+            (
+                sample.elapsed_s
+                for sample in self.samples
+                if abs(sample.commanded_speed_mps) > 1.0e-3
+            ),
+            None,
+        )
+        first_motion = next(
+            (
+                sample.elapsed_s
+                for sample in self.samples
+                if abs(sample.measured_speed_mps) > 0.02
+            ),
+            None,
+        )
         action_samples = {
             name: sum(sample.action_code == code for sample in self.samples)
             for code, name in enumerate(ACTION_NAMES)
@@ -145,6 +161,11 @@ class ExperimentAccumulator:
             'success': outcome == 'SUCCEEDED',
             'duration_s': max(0.0, timestamp - self.started_at),
             'sample_count': len(self.samples),
+            'effective_sample_rate_hz': (
+                len(self.samples) / max(1.0e-9, timestamp - self.started_at)
+            ),
+            'time_to_first_command_s': first_command,
+            'time_to_first_motion_s': first_motion,
             'distance_travelled_m': self.distance_travelled,
             'mean_abs_cross_track_error_m': (
                 sum(cross_track) / len(cross_track) if cross_track else None
@@ -159,6 +180,10 @@ class ExperimentAccumulator:
             ),
             'max_measured_speed_mps': (
                 max(measured_speed) if measured_speed else None
+            ),
+            'mean_measured_speed_mps': (
+                sum(measured_speed) / len(measured_speed)
+                if measured_speed else None
             ),
             'minimum_front_clearance_m': min(front) if front else None,
             'minimum_nearest_clearance_m': min(nearest) if nearest else None,
