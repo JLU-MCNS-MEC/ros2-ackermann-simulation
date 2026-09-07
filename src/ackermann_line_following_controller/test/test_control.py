@@ -5,6 +5,7 @@ from ackermann_line_following_controller.control import (
     AckermannCommandLimiter,
     clamp,
     compute_pid_steering,
+    twist_to_ackermann,
 )
 from ackermann_line_following_controller.line_follower_node import detect_line_error
 import pytest
@@ -38,6 +39,28 @@ def test_ackermann_conversion() -> None:
     assert ackermann_to_yaw_rate(0.56, math.atan(1.0), 0.56) == pytest.approx(1.0)
     with pytest.raises(ValueError):
         ackermann_to_yaw_rate(1.0, 0.0, 0.0)
+
+
+def test_twist_conversion_round_trip_forward_and_reverse() -> None:
+    for speed, steering in ((0.4, 0.3), (-0.25, -0.2)):
+        yaw_rate = ackermann_to_yaw_rate(speed, steering, 0.56)
+        converted_speed, converted_steering = twist_to_ackermann(
+            speed, yaw_rate, 0.56, 0.6, 0.55
+        )
+        assert converted_speed == pytest.approx(speed)
+        assert converted_steering == pytest.approx(steering)
+
+
+def test_twist_conversion_clamps_and_rejects_stationary_rotation() -> None:
+    speed, steering = twist_to_ackermann(2.0, 10.0, 0.56, 0.6, 0.55)
+    assert speed == pytest.approx(0.6)
+    assert steering == pytest.approx(0.55)
+    assert twist_to_ackermann(0.0, 1.0, 0.56, 0.6, 0.55) == (0.0, 0.0)
+
+    with pytest.raises(ValueError, match='finite'):
+        twist_to_ackermann(float('nan'), 0.0, 0.56, 0.6, 0.55)
+    with pytest.raises(ValueError, match='wheelbase'):
+        twist_to_ackermann(0.2, 0.0, 0.0, 0.6, 0.55)
 
 
 def test_command_limiter_limits_forward_acceleration_and_steering_rate() -> None:

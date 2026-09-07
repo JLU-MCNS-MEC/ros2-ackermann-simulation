@@ -7,7 +7,7 @@ import time
 import numpy as np
 import rclpy
 from rclpy.qos import qos_profile_sensor_data
-from sensor_msgs.msg import CameraInfo, Image, LaserScan, PointCloud2
+from sensor_msgs.msg import CameraInfo, Image, Imu, LaserScan, PointCloud2
 
 
 def main():
@@ -18,6 +18,7 @@ def main():
     subscriptions = []
     topics = {
         '/scan': LaserScan,
+        '/imu/data_raw': Imu,
         '/rgbd/image': Image,
         '/rgbd/depth_image': Image,
         '/rgbd/camera_info': CameraInfo,
@@ -31,8 +32,14 @@ def main():
         row['wall'].append(time.monotonic())
         row['frame'] = msg.header.frame_id
         if topic == '/scan':
-            index = round(-msg.angle_min / msg.angle_increment)
-            row['values'].append(float(msg.ranges[index]))
+            finite_ranges = [
+                float(value)
+                for value in msg.ranges
+                if math.isfinite(value) and value >= msg.range_min
+            ]
+            row['values'].append(
+                min(finite_ranges) if finite_ranges else float('nan')
+            )
             row['samples'] = len(msg.ranges)
         elif topic == '/rgbd/depth_image':
             row['encoding'] = msg.encoding
@@ -45,6 +52,19 @@ def main():
             row['valid_fraction'] = float(np.isfinite(pixels).mean())
         elif isinstance(msg, (Image, PointCloud2)):
             row['size'] = [msg.width, msg.height]
+        elif topic == '/imu/data_raw':
+            row['values'].append((
+                math.sqrt(
+                    msg.angular_velocity.x ** 2
+                    + msg.angular_velocity.y ** 2
+                    + msg.angular_velocity.z ** 2
+                ),
+                math.sqrt(
+                    msg.linear_acceleration.x ** 2
+                    + msg.linear_acceleration.y ** 2
+                    + msg.linear_acceleration.z ** 2
+                ),
+            ))
 
     try:
         for topic, message_type in topics.items():
@@ -80,8 +100,32 @@ def main():
                     row['std_m'] = float(np.std(finite))
                     row['absolute_error_m'] = abs(row['mean_m'] - expected)
                 ok = ok and len(finite) == len(stamps) and row.get('absolute_error_m', 99) < 0.05
+            elif topic == '/imu/data_raw':
+                gyro_norms = [value[0] for value in values]
+                acceleration_norms = [value[1] for value in values]
+                if values:
+                    row['gyro_norm_mean_rad_s'] = float(
+                        np.mean(gyro_norms)
+                    )
+                    row['acceleration_norm_mean_m_s2'] = float(
+                        np.mean(acceleration_norms)
+                    )
+                    row['gravity_absolute_error_m_s2'] = abs(
+                        row['acceleration_norm_mean_m_s2'] - 9.81
+                    )
+                ok = (
+                    ok
+                    and len(values) == len(stamps)
+                    and row.get('gyro_norm_mean_rad_s', 99.0) < 0.02
+                    and row.get('gravity_absolute_error_m_s2', 99.0) < 0.15
+                )
             row['data_passed'] = bool(ok)
-            row['minimum_wall_hz'] = 9.0 if topic == '/scan' else 12.0
+            if topic == '/scan':
+                row['minimum_wall_hz'] = 9.0
+            elif topic == '/imu/data_raw':
+                row['minimum_wall_hz'] = 80.0
+            else:
+                row['minimum_wall_hz'] = 12.0
             row['rate_passed'] = row.get('wall_hz', 0) >= row['minimum_wall_hz']
             ok = ok and row['rate_passed']
             row['passed'] = bool(ok)

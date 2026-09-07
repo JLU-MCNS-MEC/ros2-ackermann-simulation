@@ -13,8 +13,10 @@ from nav_msgs.msg import Odometry, Path
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
+from rclpy.time import Time
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float64
+from tf2_ros import Buffer, TransformException, TransformListener
 from visualization_msgs.msg import Marker
 
 
@@ -90,6 +92,35 @@ def path_metrics(
     return PathMetrics(minimum_distance, goal_distance)
 
 
+def transform_point_2d(
+    x: float,
+    y: float,
+    translation_x: float,
+    translation_y: float,
+    quaternion_x: float,
+    quaternion_y: float,
+    quaternion_z: float,
+    quaternion_w: float,
+) -> tuple[float, float]:
+    """Apply a rigid transform to a planar point."""
+    yaw = math.atan2(
+        2.0 * (
+            quaternion_w * quaternion_z
+            + quaternion_x * quaternion_y
+        ),
+        1.0 - 2.0 * (
+            quaternion_y * quaternion_y
+            + quaternion_z * quaternion_z
+        ),
+    )
+    cosine = math.cos(yaw)
+    sine = math.sin(yaw)
+    return (
+        translation_x + cosine * x - sine * y,
+        translation_y + sine * x + cosine * y,
+    )
+
+
 def scan_clearances(
     scan: LaserScan,
     front_half_angle: float,
@@ -160,7 +191,11 @@ class NavigationDiagnosticsNode(Node):
             DiagnosticArray, '/diagnostics', 10
         )
 
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
         self.pose_xy: tuple[float, float] | None = None
+        self.pose_frame = ''
+        self.path_frame = ''
         self.path_points: list[tuple[float, float]] = []
         self.action_name = 'CLEAR'
         self.action_polygon = '-'
@@ -226,11 +261,13 @@ class NavigationDiagnosticsNode(Node):
             float(message.pose.pose.position.x),
             float(message.pose.pose.position.y),
         )
+        self.pose_frame = message.header.frame_id
         self.values['speed/measured'] = float(message.twist.twist.linear.x)
         self.values['yaw_rate/measured'] = float(message.twist.twist.angular.z)
         self._update_path_metrics()
 
     def _path_callback(self, message: Path) -> None:
+        self.path_frame = message.header.frame_id
         self.path_points = [
             (float(pose.pose.position.x), float(pose.pose.position.y))
             for pose in message.poses
@@ -240,7 +277,28 @@ class NavigationDiagnosticsNode(Node):
     def _update_path_metrics(self) -> None:
         if self.pose_xy is None:
             return
-        metrics = path_metrics(*self.pose_xy, self.path_points)
+        pose_xy = self.pose_xy
+        if (
+            self.path_frame
+            and self.pose_frame
+            and self.path_frame != self.pose_frame
+        ):
+            try:
+                transform = self.tf_buffer.lookup_transform(
+                    self.path_frame, self.pose_frame, Time()
+                ).transform
+            except TransformException:
+                return
+            pose_xy = transform_point_2d(
+                *pose_xy,
+                float(transform.translation.x),
+                float(transform.translation.y),
+                float(transform.rotation.x),
+                float(transform.rotation.y),
+                float(transform.rotation.z),
+                float(transform.rotation.w),
+            )
+        metrics = path_metrics(*pose_xy, self.path_points)
         self.values['navigation/cross_track_error'] = metrics.cross_track_error
         self.values['navigation/distance_to_goal'] = metrics.distance_to_goal
 

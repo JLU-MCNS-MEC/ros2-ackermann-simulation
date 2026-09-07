@@ -4,14 +4,14 @@
 
 ## 1. 已确定的传感器基线
 
-当前仿真使用 **MID-360 样式三维雷达 + 前向 RGB-D + 轮式里程计**。Gazebo 原生 `/scan` 对多层雷达没有产生有效二维回波，因此导航使用 `/scan/points`，并通过 `pointcloud_to_laserscan` 生成经过高度裁剪的 `/scan_nav`。实车增加 IMU，与编码器融合。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
+当前仿真使用 **MID-360 样式三维雷达 + 前向 RGB-D + 轮式里程计 + IMU**。Gazebo 原生 `/scan` 对多层雷达没有产生有效二维回波，因此导航使用 `/scan/points`，并通过 `pointcloud_to_laserscan` 生成经过高度裁剪的 `/scan_nav`。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
 
 | 部件 | 本次仿真配置 | 用途与实车候选 |
 | --- | --- | --- |
 | MID-360 样式雷达 | 水平 1024 点 × 垂直 20 层，10 Hz，0.12–12 m，水平 360°、垂直 -7°…+52°，高 0.36 m，1 cm 高斯噪声；发布 `/scan/points`，再投影为 `/scan_nav` | 三维点云、平面投影、低矮/悬空障碍；实车候选 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) |
 | RGB-D | 640×480，15 Hz，水平视场约 69.4°，0.2–8 m；前移 0.36 m，高 0.41 m | 彩色点云、低矮/悬空障碍、三维重建；候选 [RealSense D435i](https://www.realsenseai.com/cn/products/d435i/)，带 IMU |
 | 原 RGB 相机 | 640×360，30 Hz，向下倾斜 | 循迹回归测试，不作为前向建图相机 |
-| 里程计/IMU | 仿真导航使用 Gazebo `OdometryPublisher` 的模型位姿；原生轮积分输出另存为 `/model/ackermann_car/wheel_odometry`；本次未新增 IMU 仿真 | 实车编码器 + IMU，经 robot_localization 输出连续 odom |
+| 里程计/IMU | 默认导航仍使用 Gazebo 模型位姿；轮积分输出在 `/model/ackermann_car/wheel_odometry`；100 Hz 带噪 IMU 在 `/imu/data_raw`；`ekf_localization_test.launch.py` 已验证融合输出 | 实车编码器 + IMU，经 robot_localization 输出连续 odom；协方差必须来自实测 |
 
 若主要目标改为户外三维 SLAM，优先评估 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) + 同步相机 + IMU。其扫描模式不能用本次单线雷达仿真代表。二维雷达无法单独恢复完整三维场景；RGB-D 的 8 m 裁剪上限也不意味着实机在 8 m 仍有可靠深度。
 
@@ -53,7 +53,7 @@ export ROS_DOMAIN_ID=47
 /usr/bin/python3 scripts/check_sensors.py > docs/results/sensor_lab.json
 ```
 
-脚本等待发现后采样 20 秒墙钟时间；检查五条话题、时间戳递增、中心测距误差 < 5 cm。频率门槛：雷达 ≥ 9 Hz，RGB-D 各流 ≥ 12 Hz。失败返回非零；JSON 区分 data_passed 与 rate_passed。仅用于静止、原点出生的 sensor_lab。单调时间戳不等于跨传感器已经同步。
+脚本等待发现后采样 20 秒墙钟时间；检查六条话题、时间戳递增、中心测距误差 < 5 cm，并检查静止 IMU 的角速度和重力模长。频率门槛：雷达 ≥ 9 Hz、IMU ≥ 80 Hz、RGB-D 各流 ≥ 12 Hz。失败返回非零；JSON 区分 data_passed 与 rate_passed。仅用于静止、原点出生的 sensor_lab。单调时间戳不等于跨传感器已经同步。
 
 本机首轮结果：雷达 9.76 Hz，均值 3.000893 m，标准差 0.009658 m；RGB 8.15 Hz，深度 11.14 Hz，点云 9.38 Hz。深度中心为 2.640000 m，符合 3−0.36 m 的几何真值。深度未模拟实机噪声，因此极小误差不能用于硬件选购。按正式门槛复测的原始结果保存在 [sensor_lab.json](results/sensor_lab.json)。这些是传感器链路基线，不代表完成了实机同步验收。
 
