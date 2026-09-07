@@ -14,4 +14,131 @@ def test_sim_launch_exposes_stationary_mode():
     description = module.generate_launch_description()
     names = {entity.name for entity in description.entities
              if isinstance(entity, DeclareLaunchArgument)}
-    assert {'enable_line_follower', 'start_x', 'start_y', 'gz_args'} <= names
+    assert {
+        'enable_line_follower',
+        'enable_waypoint_nav',
+        'enable_rgbd',
+        'start_x',
+        'start_y',
+        'gz_args',
+        'target_speed',
+        'waypoint_file',
+        'world_name',
+        'max_speed',
+        'max_acceleration',
+        'max_deceleration',
+        'max_steering',
+        'max_steering_rate',
+        'command_timeout',
+        'control_rate',
+    } <= names
+
+
+def test_sim_launch_uses_mid360_scan_and_pointcloud_bridge():
+    bringup_dir = Path(__file__).parents[1]
+    urdf = (
+        bringup_dir.parent / 'ackermann_line_following_description'
+        / 'urdf' / 'ackermann_car.urdf.xacro'
+    ).read_text(encoding='utf-8')
+    bridge = (bringup_dir / 'launch' / 'sim.launch.py').read_text(
+        encoding='utf-8'
+    )
+    assert '<sensor name="mid360" type="gpu_lidar">' in urdf
+    assert '<vertical>' in urdf
+    assert '<samples>20</samples>' in urdf
+    assert (
+        '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'
+        in bridge
+    )
+
+
+def test_rviz_configs_color_mid360_points_by_height():
+    bringup_dir = Path(__file__).parents[1]
+    for config_name in ('dynamics.rviz', 'perception.rviz'):
+        config = (bringup_dir / 'rviz' / config_name).read_text(
+            encoding='utf-8'
+        )
+        assert 'Name: MID360 PointCloud' in config
+        assert 'Color Transformer: AxisColor' in config
+        assert 'Topic: /scan/points' in config
+
+
+def test_nav2_launch_uses_open_source_navigation_stack():
+    path = Path(__file__).parents[1] / 'launch' / 'nav2_waypoint_nav.launch.py'
+    spec = importlib.util.spec_from_file_location('nav2_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {entity.name for entity in description.entities
+             if isinstance(entity, DeclareLaunchArgument)}
+    assert {'waypoint_file', 'send_waypoints', 'use_rviz', 'entity_name'} <= names
+
+    launch_text = path.read_text(encoding='utf-8')
+    assert "package='pointcloud_to_laserscan'" in launch_text
+    assert "('cloud_in', '/scan/points')" in launch_text
+    assert "('scan', '/scan_nav')" in launch_text
+
+
+def test_nav2_uses_projected_scan_and_3d_voxel_layer():
+    bringup_dir = Path(__file__).parents[1]
+    params = (bringup_dir / 'config' / 'nav2_ackermann_params.yaml').read_text(
+        encoding='utf-8'
+    )
+    assert 'topic: "/scan_nav"' in params
+    assert 'plugin: "nav2_costmap_2d::VoxelLayer"' in params
+    assert 'topic: /scan/points' in params
+    assert 'polygons: ["PolygonStop", "PolygonSlow", "FootprintApproach"]' in params
+
+
+def test_unknown_obstacle_scenario_uses_free_static_map():
+    bringup_dir = Path(__file__).parents[1]
+    scenario_launch = (
+        bringup_dir / 'launch' / 'static_map_scenarios.launch.py'
+    ).read_text(encoding='utf-8')
+    free_map = (bringup_dir / 'maps' / 'free_navigation.yaml').read_text(
+        encoding='utf-8'
+    )
+    assert "'unknown_obstacle'" in scenario_launch
+    assert "'free_navigation.yaml'" in scenario_launch
+    assert 'image: free_navigation.pgm' in free_map
+
+    pgm_lines = (bringup_dir / 'maps' / 'free_navigation.pgm').read_text(
+        encoding='ascii'
+    ).splitlines()
+    pixels = [int(value) for line in pgm_lines[4:] for value in line.split()]
+    width, height = 200, 160
+    interior = [
+        pixels[y * width + x]
+        for y in range(2, height - 2)
+        for x in range(2, width - 2)
+    ]
+    assert len(pixels) == width * height
+    assert set(interior) == {254}
+
+
+def test_dynamics_launch_exposes_report_and_rviz_controls():
+    path = Path(__file__).parents[1] / 'launch' / 'dynamics_test.launch.py'
+    spec = importlib.util.spec_from_file_location('dynamics_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {entity.name for entity in description.entities
+             if isinstance(entity, DeclareLaunchArgument)}
+    assert {'run_test', 'use_rviz', 'result_file', 'segment_scale'} <= names
+
+
+def test_static_scenario_launch_exposes_scenario_selector():
+    path = Path(__file__).parents[1] / 'launch' / 'static_map_scenarios.launch.py'
+    spec = importlib.util.spec_from_file_location('static_scenarios_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {entity.name for entity in description.entities
+             if isinstance(entity, DeclareLaunchArgument)}
+    assert {
+        'scenario',
+        'send_waypoints',
+        'use_rviz',
+        'target_speed',
+        'gz_args',
+    } <= names

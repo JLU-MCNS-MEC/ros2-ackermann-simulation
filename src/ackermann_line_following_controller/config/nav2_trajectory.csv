@@ -1,0 +1,8 @@
+# Nav2 route in the map frame. The central obstacle occupies x=0.30..1.00.
+# The lower checkpoint keeps the live-laser detour inside the mapped corridor.
+# Smac Hybrid-A* still chooses the collision-free side for the final segment;
+# the checkpoint only prevents a repeatable run from selecting the upper map
+# boundary, where the side reference block leaves too little clearance.
+-3.5, 0.0
+-1.5, -0.9
+3.5, 0.0

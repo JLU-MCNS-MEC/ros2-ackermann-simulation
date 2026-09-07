@@ -1,5 +1,6 @@
 """Pure control helpers kept independent from ROS for easy testing."""
 
+from dataclasses import dataclass
 import math
 
 
@@ -59,3 +60,103 @@ def ackermann_to_yaw_rate(
     if wheelbase <= 0.0:
         raise ValueError('wheelbase must be positive')
     return speed * math.tan(steering_angle) / wheelbase
+
+
+@dataclass
+class AckermannCommandLimiter:
+    """Apply the longitudinal and steering limits of the simulated chassis.
+
+    The Gazebo Ackermann system accepts a planar ``Twist`` command, but a real
+    drive controller cannot jump from full forward to full reverse or change
+    the steering angle instantaneously.  Keeping this stateful limiter outside
+    the ROS node makes the command dynamics deterministic and unit-testable.
+    """
+
+    max_speed: float = 0.6
+    max_acceleration: float = 1.5
+    max_deceleration: float = 1.5
+    max_steering: float = 0.55
+    max_steering_rate: float = 2.0
+    speed: float = 0.0
+    steering_angle: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Validate the physical limits before accepting a command."""
+        for name in (
+            'max_speed',
+            'max_acceleration',
+            'max_deceleration',
+            'max_steering',
+            'max_steering_rate',
+        ):
+            value = float(getattr(self, name))
+            if not math.isfinite(value) or value <= 0.0:
+                raise ValueError(f'{name} must be finite and positive')
+        self.speed = float(self.speed)
+        self.steering_angle = float(self.steering_angle)
+        if not (math.isfinite(self.speed) and math.isfinite(self.steering_angle)):
+            raise ValueError('initial command state must be finite')
+        self.speed = clamp(self.speed, -self.max_speed, self.max_speed)
+        self.steering_angle = clamp(
+            self.steering_angle,
+            -self.max_steering,
+            self.max_steering,
+        )
+
+    def reset(self) -> None:
+        """Reset the command state to a stopped, straight configuration."""
+        self.speed = 0.0
+        self.steering_angle = 0.0
+
+    def update(
+        self,
+        target_speed: float,
+        target_steering: float,
+        dt: float,
+    ) -> tuple[float, float]:
+        """Move the current command toward a bounded target over ``dt``.
+
+        A sign change is handled as braking through zero before acceleration in
+        the opposite direction.  This is the minimum behavior expected from a
+        drive-by-wire controller and makes reverse commands safe to replay.
+        """
+        if not math.isfinite(target_speed) or not math.isfinite(target_steering):
+            raise ValueError('target command must be finite')
+        if not math.isfinite(dt) or dt <= 0.0:
+            raise ValueError('dt must be finite and positive')
+
+        target_speed = clamp(target_speed, -self.max_speed, self.max_speed)
+        target_steering = clamp(
+            target_steering,
+            -self.max_steering,
+            self.max_steering,
+        )
+
+        speed_delta = target_speed - self.speed
+        slowing_down = (
+            abs(target_speed) < abs(self.speed)
+            or target_speed * self.speed < 0.0
+        )
+        speed_limit = (
+            self.max_deceleration if slowing_down else self.max_acceleration
+        )
+        self.speed += clamp(
+            speed_delta,
+            -speed_limit * dt,
+            speed_limit * dt,
+        )
+        steering_delta = target_steering - self.steering_angle
+        self.steering_angle += clamp(
+            steering_delta,
+            -self.max_steering_rate * dt,
+            self.max_steering_rate * dt,
+        )
+
+        if abs(target_speed) < 1.0e-9 and abs(self.speed) < speed_limit * dt:
+            self.speed = 0.0
+        if (
+            abs(target_steering) < 1.0e-9
+            and abs(self.steering_angle) < self.max_steering_rate * dt
+        ):
+            self.steering_angle = 0.0
+        return self.speed, self.steering_angle

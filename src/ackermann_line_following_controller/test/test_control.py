@@ -1,13 +1,13 @@
 import math
 
-import pytest
-
 from ackermann_line_following_controller.control import (
     ackermann_to_yaw_rate,
+    AckermannCommandLimiter,
     clamp,
     compute_pid_steering,
 )
 from ackermann_line_following_controller.line_follower_node import detect_line_error
+import pytest
 
 
 def test_clamp_and_invalid_bounds() -> None:
@@ -38,6 +38,39 @@ def test_ackermann_conversion() -> None:
     assert ackermann_to_yaw_rate(0.56, math.atan(1.0), 0.56) == pytest.approx(1.0)
     with pytest.raises(ValueError):
         ackermann_to_yaw_rate(1.0, 0.0, 0.0)
+
+
+def test_command_limiter_limits_forward_acceleration_and_steering_rate() -> None:
+    limiter = AckermannCommandLimiter(
+        max_acceleration=1.0,
+        max_steering_rate=1.0,
+    )
+
+    speed, steering = limiter.update(0.6, 0.55, 0.1)
+
+    assert speed == pytest.approx(0.1)
+    assert steering == pytest.approx(0.1)
+
+
+def test_command_limiter_brakes_through_zero_before_reverse() -> None:
+    limiter = AckermannCommandLimiter(speed=0.4)
+
+    speed, _ = limiter.update(-0.4, 0.0, 0.1)
+
+    assert speed == pytest.approx(0.25)
+    for _ in range(4):
+        speed, _ = limiter.update(-0.4, 0.0, 0.1)
+    assert speed < 0.0
+
+
+def test_command_limiter_clamps_targets_and_rejects_invalid_dt() -> None:
+    limiter = AckermannCommandLimiter(max_speed=0.3, max_steering=0.4)
+    speed, steering = limiter.update(2.0, -2.0, 1.0)
+    assert speed == pytest.approx(0.3)
+    assert steering == pytest.approx(-0.4)
+
+    with pytest.raises(ValueError, match='dt'):
+        limiter.update(0.0, 0.0, 0.0)
 
 
 def test_dark_line_centroid_error() -> None:

@@ -1,0 +1,9 @@
+# x [m], y [m] in the odom frame.  The tracker selects a forward lookahead point.
+-3.5,0.0
+-2.5,0.0
+-1.5,0.0
+-0.5,0.0
+0.5,0.0
+1.5,0.0
+2.5,0.0
+3.5,0.0

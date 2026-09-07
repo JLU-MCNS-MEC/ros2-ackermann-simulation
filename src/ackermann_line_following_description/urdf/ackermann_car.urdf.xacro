@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot name="ackermann_car" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:arg name="enable_rgbd" default="true"/>
+
   <!-- Keep these dimensions in one place so another chassis can reuse the controller. -->
   <xacro:property name="pi_value" value="3.141592653589793"/>
   <xacro:property name="wheel_radius" value="0.09"/>
@@ -251,30 +253,45 @@
     <origin xyz="0 0 0.36"/>
   </joint>
   <gazebo reference="lidar_link">
-    <sensor name="lidar" type="gpu_lidar">
+    <!--
+      MID-360-style solid-state lidar.  The link remains at a fixed vehicle
+      height, but the scan itself spans several vertical angles, so the
+      returned point cloud contains real z variation.  Gazebo publishes both
+      a planar LaserScan on /scan (for the existing Nav2 and safety nodes) and
+      a PointCloudPacked stream on /scan/points.
+    -->
+    <sensor name="mid360" type="gpu_lidar">
       <gz_frame_id>lidar_link</gz_frame_id>
       <topic>/scan</topic><always_on>true</always_on><update_rate>10</update_rate>
       <lidar>
-        <scan><horizontal><samples>720</samples><resolution>1</resolution>
+        <scan>
+          <horizontal><samples>1024</samples><resolution>1</resolution>
           <min_angle>${-pi_value}</min_angle><max_angle>${pi_value}</max_angle>
-        </horizontal></scan>
+          </horizontal>
+          <!-- MID-360 nominal vertical FOV: -7 to +52 degrees. -->
+          <vertical><samples>20</samples><resolution>1</resolution>
+            <min_angle>-0.122173</min_angle><max_angle>0.907571</max_angle>
+          </vertical>
+        </scan>
         <range><min>0.12</min><max>12</max><resolution>0.01</resolution></range>
         <noise><type>gaussian</type><mean>0</mean><stddev>0.01</stddev></noise>
       </lidar>
     </sensor>
   </gazebo>
-  <gazebo reference="rgbd_link">
-    <sensor name="rgbd" type="rgbd_camera">
-      <gz_frame_id>rgbd_optical_frame</gz_frame_id>
-      <topic>/rgbd</topic><always_on>true</always_on><update_rate>15</update_rate>
-      <camera>
-        <horizontal_fov>1.211</horizontal_fov>
-        <image><width>640</width><height>480</height><format>R8G8B8</format></image>
-        <clip><near>0.2</near><far>8</far></clip>
-        <depth_camera><clip><near>0.2</near><far>8</far></clip></depth_camera>
-      </camera>
-    </sensor>
-  </gazebo>
+  <xacro:if value="$(arg enable_rgbd)">
+    <gazebo reference="rgbd_link">
+      <sensor name="rgbd" type="rgbd_camera">
+        <gz_frame_id>rgbd_optical_frame</gz_frame_id>
+        <topic>/rgbd</topic><always_on>true</always_on><update_rate>15</update_rate>
+        <camera>
+          <horizontal_fov>1.211</horizontal_fov>
+          <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+          <clip><near>0.2</near><far>8</far></clip>
+          <depth_camera><clip><near>0.2</near><far>8</far></clip></depth_camera>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
 
   <!-- Gazebo Sim's native Ackermann system is model-name agnostic at runtime. -->
   <gazebo>
@@ -299,6 +316,24 @@
       <odom_publish_frequency>30</odom_publish_frequency>
       <frame_id>odom</frame_id>
       <child_frame_id>base_footprint</child_frame_id>
+      <!-- Keep wheel-integrated odometry available for encoder experiments,
+           but do not let it collide with the ground-truth navigation topic.
+           The native plugin integrates wheel angles and can drift when the
+           chassis is pushing against an obstacle. -->
+      <odom_topic>/model/ackermann_car/wheel_odometry</odom_topic>
+      <tf_topic>/model/ackermann_car/wheel_tf</tf_topic>
+    </plugin>
+    <!-- Gazebo's reference OdometryPublisher reports the simulated model pose
+         directly. It is used only by the simulation Nav2 launch so the map,
+         laser scan and base frame stay in one coordinate system. A real robot
+         replaces this topic with encoder + IMU fusion from robot_localization. -->
+    <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_publish_frequency>30</odom_publish_frequency>
+      <odom_topic>/model/ackermann_car/odometry</odom_topic>
+      <tf_topic>/model/ackermann_car/ground_truth_tf</tf_topic>
+      <dimensions>2</dimensions>
     </plugin>
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
   </gazebo>

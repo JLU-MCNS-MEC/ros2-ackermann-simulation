@@ -1,0 +1,4 @@
+# Offset goal used to verify a non-zero lateral target in the same static map.
+-3.5, 0.0
+-1.5, 0.0
+3.0, 1.2

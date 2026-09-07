@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Lidar1
         - /Trajectory1
+        - /Dynamics Path1
         - /RGBD PointCloud1
       Splitter Ratio: 0.45
   - Class: rviz_common/Views
@@ -34,33 +35,6 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
-      Value: true
-    - Alpha: 0.45
-      Class: rviz_default_plugins/Map
-      Color Scheme: map
-      Draw Behind: true
-      Enabled: true
-      Name: Static Map
-      Topic: /map
-      Use Timestamp: false
-      Value: true
-    - Alpha: 0.35
-      Class: rviz_default_plugins/Map
-      Color Scheme: costmap
-      Draw Behind: false
-      Enabled: true
-      Name: Global Costmap
-      Topic: /global_costmap/costmap
-      Use Timestamp: false
-      Value: true
-    - Alpha: 0.45
-      Class: rviz_default_plugins/Map
-      Color Scheme: costmap
-      Draw Behind: false
-      Enabled: true
-      Name: Local Costmap
-      Topic: /local_costmap/costmap
-      Use Timestamp: false
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -94,7 +68,7 @@ Visualization Manager:
       Queue Size: 10
       Size (Pixels): 3
       Style: Flat Squares
-      Topic: /scan_nav
+      Topic: /scan
       Use Fixed Frame: true
       Value: true
     - Alpha: 0.8
@@ -179,34 +153,20 @@ Visualization Manager:
       Topic: /waypoint_target
       Value: true
     - Class: rviz_default_plugins/Path
-      Color: 70; 255; 120
+      Color: 80; 180; 255
       Enabled: true
-      Name: Nav2 Global Plan
-      Topic: /plan
+      Name: Dynamics Path
+      Topic: /dynamics_trajectory
       Value: true
       Line Style: Lines
-      Line Width: 0.035
+      Line Width: 0.05
       Buffer Length: 1
-    - Class: rviz_default_plugins/Path
-      Color: 255; 120; 230
+    - Class: rviz_default_plugins/Marker
       Enabled: true
-      Name: Nav2 Local Plan
-      Topic: /local_plan
-      Value: true
-      Line Style: Lines
-      Line Width: 0.045
-      Buffer Length: 1
-    - Class: rviz_default_plugins/Polygon
-      Color: 255; 50; 50
-      Enabled: true
-      Name: Collision Stop Zone
-      Topic: /polygon_stop
-      Value: true
-    - Class: rviz_default_plugins/Polygon
-      Color: 255; 190; 40
-      Enabled: true
-      Name: Collision Slow Zone
-      Topic: /polygon_slowdown
+      Name: Dynamics Phase
+      Namespaces:
+        ackermann_dynamics: true
+      Topic: /dynamics_phase
       Value: true
   Enabled: true
   Global Options:
@@ -247,7 +207,7 @@ Visualization Manager:
       Name: Current View
       Near Clip Distance: 0.01
       Pitch: 0.65
-      Target Frame: <Fixed Frame>
+      Target Frame: base_link
       Value: Orbit (rviz)
       Yaw: 3.9
     Saved: ~

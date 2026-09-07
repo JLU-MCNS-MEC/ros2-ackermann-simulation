@@ -1,0 +1,4 @@
+# Direct route across a map with no pre-recorded internal obstacles.
+# The center box exists only in Gazebo and must be detected by MID-360 data.
+-3.5, 0.0
+3.5, 0.0
