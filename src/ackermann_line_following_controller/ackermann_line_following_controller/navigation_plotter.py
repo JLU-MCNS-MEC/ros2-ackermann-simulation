@@ -89,6 +89,8 @@ class NavigationPlotter:
                 if topic in widget._rosdata:
                     topics.remove(topic)
         if not any(topics for _, topics in self.pending):
+            for widget, _ in self.pending:
+                widget.data_plot.set_xlim([0.0, 90.0])
             self.discovery_timer.stop()
             self.node.get_logger().info('All navigation plot topics attached')
 
