@@ -220,6 +220,9 @@ class NavigationExperimentNode(Node):
         self.declare_parameter(
             'result_file', '/tmp/ackermann_navigation_experiment.json'
         )
+        self.declare_parameter(
+            'odom_topic', '/model/ackermann_car/odometry'
+        )
         self.declare_parameter('sample_rate', 10.0)
         scenario = str(self.get_parameter('scenario').value)
         self.result_file = Path(str(self.get_parameter('result_file').value))
@@ -238,7 +241,7 @@ class NavigationExperimentNode(Node):
             )
         self.create_subscription(
             Odometry,
-            '/model/ackermann_car/odometry',
+            str(self.get_parameter('odom_topic').value),
             self._odom_callback,
             10,
         )

@@ -252,6 +252,31 @@
     <parent link="base_link"/><child link="lidar_link"/>
     <origin xyz="0 0 0.36"/>
   </joint>
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/><child link="imu_link"/>
+    <origin xyz="0 0 0.08"/>
+  </joint>
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <gz_frame_id>imu_link</gz_frame_id>
+      <topic>/imu/data_raw</topic>
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0</mean><stddev>0.03</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0</mean><stddev>0.03</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0</mean><stddev>0.03</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
   <gazebo reference="lidar_link">
     <!--
       MID-360-style solid-state lidar.  The link remains at a fixed vehicle

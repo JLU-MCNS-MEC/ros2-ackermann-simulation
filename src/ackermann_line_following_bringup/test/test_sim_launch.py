@@ -31,6 +31,7 @@ def test_sim_launch_exposes_stationary_mode():
         'max_steering_rate',
         'command_timeout',
         'control_rate',
+        'ground_truth_tf_output',
     } <= names
 
 
@@ -50,6 +51,11 @@ def test_sim_launch_uses_mid360_scan_and_pointcloud_bridge():
         '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'
         in bridge
     )
+    assert '<sensor name="imu" type="imu">' in urdf
+    assert '/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU' in bridge
+    worlds = bringup_dir.parent / 'ackermann_line_following_description' / 'worlds'
+    for world in worlds.glob('*.sdf'):
+        assert 'gz-sim-imu-system' in world.read_text(encoding='utf-8')
 
 
 def test_rviz_configs_color_mid360_points_by_height():
@@ -89,6 +95,7 @@ def test_nav2_launch_uses_open_source_navigation_stack():
         'use_diagnostics',
         'use_rqt_plots',
         'entity_name',
+        'use_ekf_localization',
     } <= names
 
     launch_text = path.read_text(encoding='utf-8')
@@ -230,3 +237,54 @@ def test_navigation_launch_wires_diagnostics_and_live_plots():
     assert 'FollowPath.desired_linear_vel' in launch_text
     assert 'Topic: /nav_diagnostics/summary' in rviz
     assert 'Topic: /scan/points_obstacles' in rviz
+
+
+def test_sim2real_launch_exposes_hardware_command_contract():
+    path = Path(__file__).parents[1] / 'launch' / 'sim2real_control.launch.py'
+    spec = importlib.util.spec_from_file_location('sim2real_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {
+        entity.name
+        for entity in description.entities
+        if isinstance(entity, DeclareLaunchArgument)
+    }
+    assert {
+        'use_sim_time',
+        'input_topic',
+        'output_topic',
+        'wheelbase',
+        'max_speed',
+        'max_steering',
+        'minimum_speed',
+        'command_timeout',
+        'publish_rate',
+    } <= names
+
+    launch_text = path.read_text(encoding='utf-8')
+    assert "executable='twist_to_ackermann'" in launch_text
+    assert "default_value='/cmd_vel_safe'" in launch_text
+    assert "default_value='/drive'" in launch_text
+
+
+def test_ekf_launch_removes_ground_truth_tf_ownership():
+    bringup_dir = Path(__file__).parents[1]
+    launch_text = (
+        bringup_dir / 'launch' / 'ekf_localization_test.launch.py'
+    ).read_text(encoding='utf-8')
+    config = (bringup_dir / 'config' / 'ekf_sim.yaml').read_text(
+        encoding='utf-8'
+    )
+    assert "'ground_truth_tf_output': '/tf_ground_truth'" in launch_text
+    assert "package='robot_localization'" in launch_text
+    assert 'odom0: /model/ackermann_car/wheel_odometry' in config
+    assert 'imu0: /imu/data_raw' in config
+    assert 'publish_tf: true' in config
+
+    nav_launch = (
+        bringup_dir / 'launch' / 'nav2_waypoint_nav.launch.py'
+    ).read_text(encoding='utf-8')
+    assert "if_value='/odometry/filtered'" in nav_launch
+    assert "if_value='/tf_ground_truth'" in nav_launch
+    assert "package='robot_localization'" in nav_launch

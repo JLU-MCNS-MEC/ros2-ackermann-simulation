@@ -8,6 +8,7 @@ from ackermann_line_following_controller.navigation_diagnostics_node import (
     path_metrics,
     scan_clearances,
     steering_from_twist,
+    transform_point_2d,
 )
 from ackermann_line_following_controller.navigation_plotter import plot_groups
 
@@ -32,6 +33,22 @@ def test_path_metrics_projects_onto_segments_and_handles_missing_path(
     missing = path_metrics(0.0, 0.0, [])
     assert math.isnan(missing.cross_track_error)
     assert math.isnan(missing.distance_to_goal)
+
+
+def test_transform_point_2d_applies_translation_and_rotation() -> None:
+    """Odometry poses can be compared with paths in another TF frame."""
+    half_angle = math.pi / 4.0
+    transformed = transform_point_2d(
+        1.0,
+        0.0,
+        -3.5,
+        2.0,
+        0.0,
+        0.0,
+        math.sin(half_angle),
+        math.cos(half_angle),
+    )
+    assert transformed == pytest.approx((-3.5, 3.0))
 
 
 def test_scan_clearances_separates_front_from_full_mid360_scan() -> None:

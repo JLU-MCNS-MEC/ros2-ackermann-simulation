@@ -52,6 +52,7 @@ def generate_launch_description() -> LaunchDescription:
     max_steering_rate = LaunchConfiguration('max_steering_rate')
     command_timeout = LaunchConfiguration('command_timeout')
     control_rate = LaunchConfiguration('control_rate')
+    ground_truth_tf_output = LaunchConfiguration('ground_truth_tf_output')
 
     robot_description = {
         'robot_description': ParameterValue(
@@ -149,6 +150,7 @@ def generate_launch_description() -> LaunchDescription:
             '/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
             '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+            '/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU',
             '/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
@@ -168,7 +170,7 @@ def generate_launch_description() -> LaunchDescription:
             (joint_state_topic, '/joint_states'),
             # Nav2 consumes the model-pose transform. The wheel-integrated TF
             # remains visible on /tf_wheel for comparison and debugging.
-            (ground_truth_tf_topic, '/tf'),
+            (ground_truth_tf_topic, ground_truth_tf_output),
             (wheel_tf_topic, '/tf_wheel'),
         ],
         output='screen',
@@ -273,6 +275,13 @@ def generate_launch_description() -> LaunchDescription:
                 'enable_rgbd',
                 default_value='true',
                 description='Spawn the RGB-D sensor; disable it when unused.',
+            ),
+            DeclareLaunchArgument(
+                'ground_truth_tf_output',
+                default_value='/tf',
+                description=(
+                    'Remap Gazebo pose TF away from /tf when EKF owns odom TF.'
+                ),
             ),
             DeclareLaunchArgument('target_speed', default_value='0.18'),
             DeclareLaunchArgument(

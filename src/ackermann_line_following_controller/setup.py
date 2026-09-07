@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'line_follower = ackermann_line_following_controller.line_follower_node:main',
             'ackermann_to_twist = ackermann_line_following_controller.ackermann_to_twist_node:main',
+            'twist_to_ackermann = ackermann_line_following_controller.twist_to_ackermann_node:main',
             'waypoint_tracker = ackermann_line_following_controller.waypoint_tracker_node:main',
             'nav2_waypoint_sender = ackermann_line_following_controller.nav2_waypoint_sender:main',
             'ackermann_dynamics_test = ackermann_line_following_controller.dynamics_test_node:main',

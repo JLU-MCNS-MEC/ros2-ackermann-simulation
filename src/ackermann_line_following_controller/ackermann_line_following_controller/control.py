@@ -62,6 +62,47 @@ def ackermann_to_yaw_rate(
     return speed * math.tan(steering_angle) / wheelbase
 
 
+def twist_to_ackermann(
+    speed: float,
+    yaw_rate: float,
+    wheelbase: float,
+    max_speed: float,
+    max_steering: float,
+    minimum_speed: float = 0.02,
+) -> tuple[float, float]:
+    """Convert a planar body twist into a bounded Ackermann command.
+
+    A car cannot realize angular velocity while stationary.  Commands below
+    ``minimum_speed`` therefore keep the requested longitudinal stop and use
+    zero steering instead of turning an ill-conditioned division into a full
+    lock command.
+    """
+    values = (
+        speed,
+        yaw_rate,
+        wheelbase,
+        max_speed,
+        max_steering,
+        minimum_speed,
+    )
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError('Twist conversion inputs must be finite')
+    if wheelbase <= 0.0:
+        raise ValueError('wheelbase must be positive')
+    if max_speed <= 0.0:
+        raise ValueError('max_speed must be positive')
+    if max_steering <= 0.0:
+        raise ValueError('max_steering must be positive')
+    if minimum_speed < 0.0:
+        raise ValueError('minimum_speed must be non-negative')
+
+    bounded_speed = clamp(speed, -max_speed, max_speed)
+    if abs(bounded_speed) < minimum_speed:
+        return bounded_speed, 0.0
+    steering = math.atan(wheelbase * yaw_rate / bounded_speed)
+    return bounded_speed, clamp(steering, -max_steering, max_steering)
+
+
 @dataclass
 class AckermannCommandLimiter:
     """Apply the longitudinal and steering limits of the simulated chassis.

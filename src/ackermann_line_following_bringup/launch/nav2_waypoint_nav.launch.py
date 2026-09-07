@@ -7,7 +7,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import IfElseSubstitution, LaunchConfiguration
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
 
@@ -51,6 +51,17 @@ def generate_launch_description() -> LaunchDescription:
     start_y = LaunchConfiguration('start_y')
     start_z = LaunchConfiguration('start_z')
     rviz_config = LaunchConfiguration('rviz_config')
+    use_ekf_localization = LaunchConfiguration('use_ekf_localization')
+    odom_topic = IfElseSubstitution(
+        use_ekf_localization,
+        if_value='/odometry/filtered',
+        else_value='/model/ackermann_car/odometry',
+    )
+    ground_truth_tf_output = IfElseSubstitution(
+        use_ekf_localization,
+        if_value='/tf_ground_truth',
+        else_value='/tf',
+    )
 
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(sim_launch),
@@ -66,6 +77,7 @@ def generate_launch_description() -> LaunchDescription:
             'enable_ackermann_adapter': 'false',
             'enable_rgbd': 'false',
             'target_speed': target_speed,
+            'ground_truth_tf_output': ground_truth_tf_output,
         }.items(),
     )
 
@@ -78,10 +90,29 @@ def generate_launch_description() -> LaunchDescription:
         name='map_to_odom',
         output='screen',
         arguments=[
-            '--x', '0.0',
+            '--x', IfElseSubstitution(
+                use_ekf_localization,
+                if_value=start_x,
+                else_value='0.0',
+            ),
+            '--y', IfElseSubstitution(
+                use_ekf_localization,
+                if_value=start_y,
+                else_value='0.0',
+            ),
             '--frame-id', 'map',
             '--child-frame-id', 'odom',
         ],
+    )
+    ekf_config = os.path.join(bringup_share, 'config', 'ekf_sim.yaml')
+    ekf = Node(
+        condition=IfCondition(use_ekf_localization),
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[ekf_config, {'use_sim_time': True}],
+        remappings=[('odometry/filtered', '/odometry/filtered')],
     )
     map_server = Node(
         package='nav2_map_server',
@@ -183,6 +214,8 @@ def generate_launch_description() -> LaunchDescription:
                         'controller_server.ros__parameters.'
                         'FollowPath.desired_linear_vel'
                     ): target_speed,
+                    'bt_navigator.ros__parameters.odom_topic': odom_topic,
+                    'velocity_smoother.ros__parameters.odom_topic': odom_topic,
                 },
                 root_key='',
                 convert_types=True,
@@ -224,7 +257,7 @@ def generate_launch_description() -> LaunchDescription:
         executable='navigation_diagnostics',
         name='navigation_diagnostics',
         output='screen',
-        parameters=[{'use_sim_time': True}],
+        parameters=[{'use_sim_time': True, 'odom_topic': odom_topic}],
     )
     navigation_plots = Node(
         condition=IfCondition(LaunchConfiguration('use_rqt_plots')),
@@ -244,6 +277,7 @@ def generate_launch_description() -> LaunchDescription:
                 'use_sim_time': True,
                 'scenario': LaunchConfiguration('experiment_name'),
                 'result_file': LaunchConfiguration('experiment_result_file'),
+                'odom_topic': odom_topic,
             }
         ],
     )
@@ -285,6 +319,14 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument('target_speed', default_value='0.22'),
             DeclareLaunchArgument(
+                'use_ekf_localization',
+                default_value='false',
+                description=(
+                    'Fuse wheel odometry and IMU instead of using Gazebo '
+                    'ground-truth TF.'
+                ),
+            ),
+            DeclareLaunchArgument(
                 'send_waypoints',
                 default_value='true',
                 description='Send the CSV route through nav2_simple_commander.',
@@ -322,6 +364,7 @@ def generate_launch_description() -> LaunchDescription:
                 description='JSON result path; CSV samples use the same stem.',
             ),
             sim,
+            ekf,
             map_to_odom,
             map_server,
             map_lifecycle,

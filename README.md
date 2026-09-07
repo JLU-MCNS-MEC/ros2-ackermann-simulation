@@ -4,6 +4,9 @@
 
 轨迹点跟踪和激光避障实例见 [Nav2 轨迹点与避障说明](docs/waypoint_obstacle_avoidance.md)。
 
+实车控制接口、TF 发布权、定位建图选择和分阶段验收见
+[Sim2Real 架构与验收路线](docs/sim2real_plan.md)。
+
 这是一个面向 Ubuntu 24.04 的 ROS 2 Jazzy + Gazebo Harmonic 示例。车辆模型、赛道、桥接和循迹控制分开，后续替换车型时不需要重写循迹节点。
 
 ## 启动

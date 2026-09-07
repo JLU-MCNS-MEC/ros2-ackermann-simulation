@@ -102,6 +102,9 @@ def _scenario_launch(context, *args, **kwargs):
                 'start_x': start_x,
                 'start_y': start_y,
                 'target_speed': target_speed,
+                'use_ekf_localization': LaunchConfiguration(
+                    'use_ekf_localization'
+                ),
                 'send_waypoints': send_waypoints,
                 'use_rviz': use_rviz,
                 'use_diagnostics': use_diagnostics,
@@ -140,6 +143,11 @@ def generate_launch_description() -> LaunchDescription:
                 'target_speed',
                 default_value='0.18',
                 description='Desired speed passed to the Nav2 parameter set.',
+            ),
+            DeclareLaunchArgument(
+                'use_ekf_localization',
+                default_value='false',
+                description='Use wheel odometry and IMU EKF in Nav2.',
             ),
             DeclareLaunchArgument(
                 'use_diagnostics',

@@ -47,5 +47,14 @@ ros2 launch ackermann_line_following_bringup \
 - 增加不同车速、障碍尺寸、障碍位置以及低反射点云丢失组合。
 - 单独测量点云时间戳延迟。本轮在高负载启动阶段偶发约 0.83 s 延迟，超过
   Collision Monitor 的 0.8 s `source_timeout`，产生了 1–2 个安全停车样本。
-- 接入带噪声的轮速里程计和 IMU，再比较当前真值定位与 EKF/AMCL 定位下的
-  横向误差、重规划次数和成功率。
+- 已加入带噪 IMU 和轮速里程计 EKF 链路；下一步把 Nav2 的默认里程计切换为
+  `/odometry/filtered`，再比较真值定位与 EKF/AMCL 的横向误差、重规划次数和成功率。
+
+## EKF 接入回归
+
+`use_ekf_localization:=true` 会把 Gazebo 真值 TF 移到 `/tf_ground_truth`，由
+`robot_localization` 融合轮式里程计和带噪 IMU，并独占 `odom → base_footprint`。
+短直线场景于 2026-09-07 完成：耗时 8.539 s、路程 1.253 m、速度 RMSE
+0.01394 m/s、平均/最大横向误差 0.000020/0.000075 m，最终目标距离 0.259 m。
+诊断数据已在 `map` 坐标系计算。该结果验证了完整导航链路，仍需通过轮径误差、
+打滑和 IMU 偏置注入评估定位退化。
