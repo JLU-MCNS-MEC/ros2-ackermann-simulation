@@ -18,8 +18,10 @@ export ROS_DOMAIN_ID=47
 
 ```zsh
 ros2 launch ackermann_line_following_bringup nav2_waypoint_nav.launch.py \
-  send_waypoints:=true use_rviz:=true
+  send_waypoints:=true use_rviz:=true use_rqt_plots:=true
 ```
+
+`navigation_diagnostics` 以 10 Hz 汇总规划、控制、里程计、激光和安全监控数据。绘图程序复用开源 `rqt_plot` 的 `PlotWidget` 和 `DataPlot`，并在 ROS discovery 完成后重试订阅；第一个窗口对比 `/cmd_vel_nav` 原始速度、`velocity_smoother` 输出、Collision Monitor 最终输出和里程计实测速度，第二个窗口显示横向路径误差、前方 60° 障碍距离和安全动作码。动作码含义为 `0=CLEAR`、`1=STOP`、`2=SLOWDOWN`、`3=APPROACH`、`4=LIMIT`。RViz 的 `Navigation Diagnostics` 文字标记还会显示最终目标距离、360° 最近点、推算前轮转角和触发的安全区域名称。全部标量数据位于 `/nav_diagnostics/**`，同时以标准 `DiagnosticArray` 发布到 `/diagnostics`。
 
 无桌面显示时使用完整 world 路径启动服务器，另开终端查看话题：
 
