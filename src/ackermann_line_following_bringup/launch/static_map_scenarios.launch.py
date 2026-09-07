@@ -20,6 +20,8 @@ def _scenario_launch(context, *args, **kwargs):
     target_speed = LaunchConfiguration('target_speed')
     use_diagnostics = LaunchConfiguration('use_diagnostics')
     use_rqt_plots = LaunchConfiguration('use_rqt_plots')
+    record_experiment = LaunchConfiguration('record_experiment')
+    experiment_result_file = LaunchConfiguration('experiment_result_file')
     external_gz_args = LaunchConfiguration('gz_args').perform(context).strip()
 
     bringup_share = get_package_share_directory('ackermann_line_following_bringup')
@@ -30,12 +32,25 @@ def _scenario_launch(context, *args, **kwargs):
         'ackermann_line_following_controller'
     )
     scenarios = {
-        'straight': ('nav2_short_straight.csv', 'waypoint_obstacle.yaml'),
-        'offset': ('nav2_offset_goal.csv', 'waypoint_obstacle.yaml'),
-        'obstacle': ('nav2_trajectory.csv', 'waypoint_obstacle.yaml'),
+        'straight': (
+            'nav2_short_straight.csv',
+            'waypoint_obstacle.yaml',
+            'waypoint_obstacle',
+        ),
+        'offset': (
+            'nav2_offset_goal.csv',
+            'waypoint_obstacle.yaml',
+            'waypoint_obstacle',
+        ),
+        'obstacle': (
+            'nav2_trajectory.csv',
+            'waypoint_obstacle.yaml',
+            'waypoint_obstacle',
+        ),
         'unknown_obstacle': (
             'nav2_unknown_obstacle.csv',
             'free_navigation.yaml',
+            'unknown_obstacle',
         ),
     }
     if scenario not in scenarios:
@@ -44,10 +59,8 @@ def _scenario_launch(context, *args, **kwargs):
             f'Unknown static-map scenario {scenario!r}; choose: {available}'
         )
 
-    world = os.path.join(
-        description_share, 'worlds', 'waypoint_obstacle.sdf'
-    )
-    route_name, map_name = scenarios[scenario]
+    route_name, map_name, world_name = scenarios[scenario]
+    world = os.path.join(description_share, 'worlds', f'{world_name}.sdf')
     route = os.path.join(controller_share, 'config', route_name)
     map_file = os.path.join(
         bringup_share, 'maps', map_name
@@ -60,7 +73,7 @@ def _scenario_launch(context, *args, **kwargs):
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(nav_launch),
             launch_arguments={
-                'world_name': 'waypoint_obstacle',
+                'world_name': world_name,
                 'map_file': map_file,
                 'gz_args': gz_args,
                 'waypoint_file': route,
@@ -69,6 +82,9 @@ def _scenario_launch(context, *args, **kwargs):
                 'use_rviz': use_rviz,
                 'use_diagnostics': use_diagnostics,
                 'use_rqt_plots': use_rqt_plots,
+                'record_experiment': record_experiment,
+                'experiment_name': scenario,
+                'experiment_result_file': experiment_result_file,
             }.items(),
         )
     ]
@@ -111,6 +127,16 @@ def generate_launch_description() -> LaunchDescription:
                 'use_rqt_plots',
                 default_value='false',
                 description='Open live speed and decision curves.',
+            ),
+            DeclareLaunchArgument(
+                'record_experiment',
+                default_value='false',
+                description='Write CSV samples and a JSON scenario summary.',
+            ),
+            DeclareLaunchArgument(
+                'experiment_result_file',
+                default_value='/tmp/ackermann_navigation_experiment.json',
+                description='Path for the aggregate experiment report.',
             ),
             DeclareLaunchArgument(
                 'gz_args',

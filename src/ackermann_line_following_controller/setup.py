@@ -28,6 +28,7 @@ setup(
             'ackermann_dynamics_test = ackermann_line_following_controller.dynamics_test_node:main',
             'navigation_diagnostics = ackermann_line_following_controller.navigation_diagnostics_node:main',
             'navigation_plotter = ackermann_line_following_controller.navigation_plotter:main',
+            'navigation_experiment = ackermann_line_following_controller.navigation_experiment_node:main',
         ],
     },
 )

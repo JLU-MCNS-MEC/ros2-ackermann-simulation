@@ -20,6 +20,7 @@ from nav_msgs.msg import OccupancyGrid
 from nav_msgs.msg import Path as PathMessage
 import rclpy
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
+from std_msgs.msg import String
 from visualization_msgs.msg import Marker
 
 from .waypoint_tracker_node import load_waypoints, Waypoint
@@ -155,6 +156,15 @@ def main(args=None) -> None:
     path_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
     path_publisher = navigator.create_publisher(PathMessage, '/trajectory', path_qos)
     target_publisher = navigator.create_publisher(Marker, '/waypoint_target', 10)
+    status_publisher = navigator.create_publisher(
+        String, '/navigation_experiment/task_status', path_qos
+    )
+
+    def publish_status(value: str) -> None:
+        message = String()
+        message.data = value
+        status_publisher.publish(message)
+
     _publish_path(path_publisher, poses, frame_id)
 
     navigator.get_logger().info(
@@ -177,7 +187,9 @@ def main(args=None) -> None:
         raise SystemExit(1)
     if not navigator.goThroughPoses(poses):
         navigator.get_logger().error('Nav2 rejected NavigateThroughPoses goal')
+        publish_status('FAILED')
     else:
+        publish_status('RUNNING')
         last_waypoint = -1
         while not navigator.isTaskComplete():
             feedback = navigator.getFeedback()
@@ -202,10 +214,13 @@ def main(args=None) -> None:
         if result == TaskResult.SUCCEEDED:
             navigator.get_logger().info('Nav2 route completed successfully')
             route_succeeded = True
+            publish_status('SUCCEEDED')
         elif result == TaskResult.CANCELED:
             navigator.get_logger().warning('Nav2 route was canceled')
+            publish_status('CANCELED')
         else:
             navigator.get_logger().error(f'Nav2 route failed: {result.name}')
+            publish_status('FAILED')
 
     navigator.destroy_node()
     if rclpy.ok():

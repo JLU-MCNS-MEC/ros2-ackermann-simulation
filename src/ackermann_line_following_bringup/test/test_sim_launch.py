@@ -118,6 +118,7 @@ def test_unknown_obstacle_scenario_uses_free_static_map():
     )
     assert "'unknown_obstacle'" in scenario_launch
     assert "'free_navigation.yaml'" in scenario_launch
+    assert "'unknown_obstacle'," in scenario_launch
     assert 'image: free_navigation.pgm' in free_map
 
     pgm_lines = (bringup_dir / 'maps' / 'free_navigation.pgm').read_text(
@@ -132,6 +133,20 @@ def test_unknown_obstacle_scenario_uses_free_static_map():
     ]
     assert len(pixels) == width * height
     assert set(interior) == {254}
+
+
+def test_unknown_obstacle_world_contains_only_the_test_obstacle():
+    """Unknown-obstacle baseline is not confounded by display objects."""
+    world = (
+        Path(__file__).parents[2]
+        / 'ackermann_line_following_description'
+        / 'worlds'
+        / 'unknown_obstacle.sdf'
+    ).read_text(encoding='utf-8')
+    assert '<world name="unknown_obstacle">' in world
+    assert '<model name="center_obstacle">' in world
+    assert 'left_obstacle' not in world
+    assert 'right_obstacle' not in world
 
 
 def test_dynamics_launch_exposes_report_and_rviz_controls():
@@ -160,6 +175,8 @@ def test_static_scenario_launch_exposes_scenario_selector():
         'target_speed',
         'use_diagnostics',
         'use_rqt_plots',
+        'record_experiment',
+        'experiment_result_file',
         'gz_args',
     } <= names
 
@@ -175,4 +192,5 @@ def test_navigation_launch_wires_diagnostics_and_live_plots():
     )
     assert "executable='navigation_diagnostics'" in launch_text
     assert "executable='navigation_plotter'" in launch_text
+    assert "executable='navigation_experiment'" in launch_text
     assert 'Topic: /nav_diagnostics/summary' in rviz
