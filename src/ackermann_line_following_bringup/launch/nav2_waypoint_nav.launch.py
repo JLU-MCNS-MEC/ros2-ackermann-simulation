@@ -159,6 +159,10 @@ def generate_launch_description() -> LaunchDescription:
                         'bt_navigator.ros__parameters.'
                         'default_nav_through_poses_bt_xml'
                     ): ackermann_through_poses_bt,
+                    (
+                        'controller_server.ros__parameters.'
+                        'FollowPath.desired_linear_vel'
+                    ): target_speed,
                 },
                 root_key='',
                 convert_types=True,

@@ -103,7 +103,7 @@ ros2 launch ackermann_line_following_bringup dynamics_test.launch.py \
 
 无桌面环境可使用 `use_rviz:=false` 和 `gz_args:='-r -s <install>/.../dynamics_test.sdf'`；报告默认写到 `/tmp/ackermann_dynamics_result.json`，`/dynamics_trajectory` 与 `/dynamics_phase` 可直接在 RViz 观察。
 
-静态地图提供四种可重复场景，统一使用 `/scan/points`、全局/局部 VoxelLayer、Smac Hybrid-A*、Regulated Pure Pursuit 和 Collision Monitor：
+静态地图提供五种可重复场景，统一使用 `/scan/points`、全局/局部 VoxelLayer、Smac Hybrid-A*、Regulated Pure Pursuit 和 Collision Monitor：
 
 | 场景 | 路线 | 验收用途 |
 | --- | --- | --- |
@@ -111,6 +111,7 @@ ros2 launch ackermann_line_following_bringup dynamics_test.launch.py \
 | `obstacle` | `(-3.5,0) → (-1.5,-0.9) → (3.5,0)` | 已知地图障碍回归 |
 | `unknown_obstacle` | `(-3.5,0) → (3.5,0)` | 空白地图中的未知中心障碍感知与绕行 |
 | `offset` | `(-3.5,0) → (-1.5,0) → (3.0,1.2)` | 非零横向终点和姿态跟踪 |
+| `complex_static` | 30×20 m、9 个路线点 | 大地图、长距离、连续转向与多障碍性能 |
 
 ```zsh
 ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
@@ -121,6 +122,8 @@ ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=offset use_rviz:=true
 ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=unknown_obstacle use_rviz:=true
+ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
+  scenario:=complex_static use_rviz:=true
 ```
 
 `perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan_nav`、`/scan/points`、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；Nav2 启动时关闭未参与导航的 RGB-D 渲染。动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。MID-360 点云使用 RViz `AxisColor` 按 Z 高度着色，点尺寸为 3 像素并保留 0.25 秒衰减，便于观察垂直层；实车接入 Livox 驱动时可改回官方常用的强度彩虹色。

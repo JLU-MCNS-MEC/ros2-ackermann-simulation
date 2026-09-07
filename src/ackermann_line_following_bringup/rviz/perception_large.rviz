@@ -1,0 +1,271 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Lidar1
+        - /Trajectory1
+        - /RGBD PointCloud1
+      Splitter Ratio: 0.45
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.35
+      Cell Size: 1
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 0.45
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: true
+      Enabled: true
+      Name: Static Map
+      Topic: /map
+      Use Timestamp: false
+      Value: true
+    - Alpha: 0.35
+      Class: rviz_default_plugins/Map
+      Color Scheme: costmap
+      Draw Behind: false
+      Enabled: true
+      Name: Global Costmap
+      Topic: /global_costmap/costmap
+      Use Timestamp: false
+      Value: true
+    - Alpha: 0.45
+      Class: rviz_default_plugins/Map
+      Color Scheme: costmap
+      Draw Behind: false
+      Enabled: true
+      Name: Local Costmap
+      Topic: /local_costmap/costmap
+      Use Timestamp: false
+      Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Name: Robot
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Class: rviz_default_plugins/LaserScan
+      Color: 255; 40; 40
+      Enabled: true
+      Name: Lidar
+      Queue Size: 10
+      Size (Pixels): 3
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /scan_nav
+      Use Fixed Frame: true
+      Value: true
+    - Alpha: 0.8
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Class: rviz_default_plugins/PointCloud2
+      Color Transformer: RGB8
+      Enabled: false
+      Name: RGBD PointCloud
+      Position Transformer: XYZ
+      Queue Size: 3
+      Selectable: true
+      Size (Pixels): 2
+      Style: Flat Squares
+      Topic: /rgbd/points
+      Use Fixed Frame: true
+      Value: false
+    - Alpha: 1
+      Autocompute Value Bounds:
+        Max Value: 2
+        Min Value: -0.5
+        Value: true
+      Axis: Z
+      Class: rviz_default_plugins/PointCloud2
+      Color Transformer: AxisColor
+      Decay Time: 0.25
+      Enabled: true
+      Name: MID360 PointCloud
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.015
+      Style: Flat Squares
+      Topic: /scan/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: false
+      Name: RGB Image
+      Normalize Range: false
+      Queue Size: 2
+      Topic: /rgbd/image
+      Transport Hint: raw
+      Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: false
+      Name: Depth Image
+      Normalize Range: true
+      Queue Size: 2
+      Topic: /rgbd/depth_image
+      Transport Hint: raw
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Frame Timeout: 15
+      Marker Scale: 0.3
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Update Interval: 0
+      Value: true
+    - Class: rviz_default_plugins/Path
+      Color: 255; 220; 40
+      Enabled: true
+      Name: Trajectory
+      Topic: /trajectory
+      Value: true
+      Line Style: Lines
+      Line Width: 0.04
+      Buffer Length: 1
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Waypoint Target
+      Namespaces:
+        waypoint_tracker: true
+      Topic: /waypoint_target
+      Value: true
+    - Class: rviz_default_plugins/Path
+      Color: 70; 255; 120
+      Enabled: true
+      Name: Nav2 Global Plan
+      Topic: /plan
+      Value: true
+      Line Style: Lines
+      Line Width: 0.035
+      Buffer Length: 1
+    - Class: rviz_default_plugins/Path
+      Color: 255; 120; 230
+      Enabled: true
+      Name: Nav2 Local Plan
+      Topic: /local_plan
+      Value: true
+      Line Style: Lines
+      Line Width: 0.045
+      Buffer Length: 1
+    - Class: rviz_default_plugins/Polygon
+      Color: 255; 50; 50
+      Enabled: true
+      Name: Collision Stop Zone
+      Topic: /polygon_stop
+      Value: true
+    - Class: rviz_default_plugins/Polygon
+      Color: 255; 190; 40
+      Enabled: true
+      Name: Collision Slow Zone
+      Topic: /polygon_slowdown
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Navigation Diagnostics
+      Namespaces:
+        navigation_diagnostics: true
+      Topic: /nav_diagnostics/summary
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: odom
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz_default_plugins/SetGoal
+      Topic: /goal_pose
+    - Class: rviz_default_plugins/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 24
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0.4
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 1.15
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 3.9
+    Saved: ~
+Window Geometry:
+  Height: 900
+  Width: 1400
+  X: 80
+  Y: 80

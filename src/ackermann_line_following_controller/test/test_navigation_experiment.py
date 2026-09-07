@@ -46,6 +46,9 @@ def test_accumulator_reports_route_quality_and_safety_metrics() -> None:
 
     assert report['success'] is True
     assert report['duration_s'] == pytest.approx(2.0)
+    assert report['effective_sample_rate_hz'] == pytest.approx(1.0)
+    assert report['time_to_first_command_s'] == pytest.approx(0.1)
+    assert report['time_to_first_motion_s'] == pytest.approx(0.1)
     assert report['distance_travelled_m'] == pytest.approx(0.5)
     assert report['mean_abs_cross_track_error_m'] == pytest.approx(0.2)
     assert report['max_abs_cross_track_error_m'] == pytest.approx(0.3)
