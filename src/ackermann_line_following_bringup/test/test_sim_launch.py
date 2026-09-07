@@ -63,6 +63,17 @@ def test_rviz_configs_color_mid360_points_by_height():
         assert 'Topic: /scan/points' in config
 
 
+def test_navigation_rviz_uses_best_effort_projected_scan():
+    config = (
+        Path(__file__).parents[1] / 'rviz' / 'perception.rviz'
+    ).read_text(encoding='utf-8')
+    lidar_start = config.index('Name: Lidar')
+    lidar_end = config.index('Name: RGBD PointCloud')
+    lidar_config = config[lidar_start:lidar_end]
+    assert 'Topic: /scan_nav' in lidar_config
+    assert 'Unreliable: true' in lidar_config
+
+
 def test_nav2_launch_uses_open_source_navigation_stack():
     path = Path(__file__).parents[1] / 'launch' / 'nav2_waypoint_nav.launch.py'
     spec = importlib.util.spec_from_file_location('nav2_launch', path)

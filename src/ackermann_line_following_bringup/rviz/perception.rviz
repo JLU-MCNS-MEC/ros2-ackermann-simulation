@@ -95,6 +95,7 @@ Visualization Manager:
       Size (Pixels): 3
       Style: Flat Squares
       Topic: /scan_nav
+      Unreliable: true
       Use Fixed Frame: true
       Value: true
     - Alpha: 0.8
@@ -137,7 +138,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Value: true
     - Class: rviz_default_plugins/Image
-      Enabled: true
+      Enabled: false
       Name: RGB Image
       Normalize Range: false
       Queue Size: 2
