@@ -30,9 +30,9 @@ ros2 launch ackermann_line_following_bringup nav2_waypoint_nav.launch.py \
   send_waypoints:=true use_rviz:=true
 ```
 
-导航启动会关闭视觉循迹，确保只有 Nav2 向底盘发布速度。当前分支的仿真验证路线会绕过中心障碍并在终点停车；传感器、TF、故障定位和开源方案比较见 [感知测试与导航路线](docs/perception_navigation.md)。
+导航启动会关闭视觉循迹和未使用的 RGB-D 渲染，确保只有 Nav2 向底盘发布速度。MID-360 PointCloud2 直接进入全局和局部 VoxelLayer，并投影为 `/scan_nav` 供 Collision Monitor 使用。默认场景在不含内部障碍的地图上感知 Gazebo 中的未知箱体，绕行后在终点停车；传感器、TF、故障定位和开源方案比较见 [感知测试与导航路线](docs/perception_navigation.md)。
 
-完整的前进、倒车、刹车和转向验收，以及短直线、中心障碍和偏置终点三种静态地图场景，见 [Nav2 轨迹点与激光避障说明](docs/waypoint_obstacle_avoidance.md)。动力学测试会把实际模型里程计写入 `/tmp/ackermann_dynamics_result.json`，并在 RViz 显示实测轨迹。
+完整的前进、倒车、刹车和转向验收，以及短直线、已知障碍、未知障碍和偏置终点四种静态地图场景，见 [Nav2 轨迹点与激光避障说明](docs/waypoint_obstacle_avoidance.md)。动力学测试会把实际模型里程计写入 `/tmp/ackermann_dynamics_result.json`，并在 RViz 显示实测轨迹。
 
 查看相机画面可以另开终端执行：
 
@@ -53,6 +53,7 @@ ros2 topic echo /cmd_ackermann
 ros2 topic echo /model/ackermann_car/odometry
 ros2 topic echo /model/ackermann_car/wheel_odometry
 ros2 topic echo /scan
+ros2 topic echo /scan_nav
 ```
 
 也可以手动给控制器发送阿克曼指令：

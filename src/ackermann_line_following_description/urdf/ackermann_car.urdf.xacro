@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot name="ackermann_car" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:arg name="enable_rgbd" default="true"/>
+
   <!-- Keep these dimensions in one place so another chassis can reuse the controller. -->
   <xacro:property name="pi_value" value="3.141592653589793"/>
   <xacro:property name="wheel_radius" value="0.09"/>
@@ -276,18 +278,20 @@
       </lidar>
     </sensor>
   </gazebo>
-  <gazebo reference="rgbd_link">
-    <sensor name="rgbd" type="rgbd_camera">
-      <gz_frame_id>rgbd_optical_frame</gz_frame_id>
-      <topic>/rgbd</topic><always_on>true</always_on><update_rate>15</update_rate>
-      <camera>
-        <horizontal_fov>1.211</horizontal_fov>
-        <image><width>640</width><height>480</height><format>R8G8B8</format></image>
-        <clip><near>0.2</near><far>8</far></clip>
-        <depth_camera><clip><near>0.2</near><far>8</far></clip></depth_camera>
-      </camera>
-    </sensor>
-  </gazebo>
+  <xacro:if value="$(arg enable_rgbd)">
+    <gazebo reference="rgbd_link">
+      <sensor name="rgbd" type="rgbd_camera">
+        <gz_frame_id>rgbd_optical_frame</gz_frame_id>
+        <topic>/rgbd</topic><always_on>true</always_on><update_rate>15</update_rate>
+        <camera>
+          <horizontal_fov>1.211</horizontal_fov>
+          <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+          <clip><near>0.2</near><far>8</far></clip>
+          <depth_camera><clip><near>0.2</near><far>8</far></clip></depth_camera>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
 
   <!-- Gazebo Sim's native Ackermann system is model-name agnostic at runtime. -->
   <gazebo>

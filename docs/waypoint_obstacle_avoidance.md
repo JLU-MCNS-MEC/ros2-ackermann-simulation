@@ -43,16 +43,16 @@ ros2 run ackermann_line_following_controller nav2_waypoint_sender
 ## 当前导航架构
 
 ```text
-/scan (MID-360 horizontal LaserScan) ─────┐
- /scan/points (MID-360 PointCloud2) ──────┤
-                            ├─ global/local costmap + inflation
+/scan/points (MID-360 PointCloud2) ───────┐
+              ├─ pointcloud_to_laserscan → /scan_nav
+              └─ global/local VoxelLayer + inflation
 waypoint CSV → NavigateThroughPoses
                             ├─ Smac Hybrid-A* (DUBIN, search radius 0.90 m)
                             └─ Regulated Pure Pursuit
                                       ↓
                             velocity_smoother
                                       ↓
-                            Collision Monitor (/scan)
+                            Collision Monitor (/scan_nav)
                                       ↓
                  /model/ackermann_car/cmd_vel (Twist)
                                       ↓
@@ -64,7 +64,7 @@ odom ── base_footprint ── base_link ── lidar_link / rgbd_optical_fra
 
 仿真中的 `/model/ackermann_car/odometry` 来自 Gazebo `OdometryPublisher` 的模型位姿，目的是让地图、激光和车体保持同一坐标系；原生 Ackermann 插件的轮积分里程计仍保留在 `/model/ackermann_car/wheel_odometry`，用于打滑对照。实车不能使用仿真真值，应由编码器和 IMU 经 `robot_localization` 输出 `odom → base_footprint`，再由 SLAM Toolbox 或 RTAB-Map 提供 `map → odom`。
 
-全局规划使用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，运动模型为 DUBIN，只允许前进并显式设置最小转弯半径。仿真搜索半径取 0.90 m，以便在稀疏检查点之间生成可行路径；Gazebo Ackermann 插件仍把实际转角限制在 0.55 rad（约 1.08 m 几何半径）。局部跟踪使用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/controller_plugins/configuring_regulated_pp/)，最后由 [Collision Monitor](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/core_servers/collision_monitor/configuring_collision_monitor_node/) 根据雷达近场区域限速或停车。`NavigateToPose` 和 `NavigateThroughPoses` 各有一棵自定义行为树，均移除了原地 `Spin` 和倒车 `BackUp` 恢复动作，因为它们与当前前进式 Ackermann 约束不匹配。
+全局规划使用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，运动模型为 DUBIN，只允许前进并显式设置最小转弯半径。轴距 0.56 m、转角上限 0.55 rad，对应单轨模型最小半径约 0.91 m，因此搜索半径取 0.90 m。局部跟踪使用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/controller_plugins/configuring_regulated_pp/)，最后由 [Collision Monitor](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/core_servers/collision_monitor/configuring_collision_monitor_node/) 根据 `/scan_nav` 近场区域限速或停车。`NavigateToPose` 和 `NavigateThroughPoses` 各有一棵自定义行为树，均移除了原地 `Spin` 和倒车 `BackUp` 恢复动作，因为它们与当前前进式 Ackermann 约束不匹配。
 
 ## 为什么之前车辆看起来不前进
 
@@ -85,6 +85,7 @@ odom ── base_footprint ── base_link ── lidar_link / rgbd_optical_fra
 
 - 短直线路径 `(-3.5,0) → (-2.0,0)`：Nav2 到达并返回 `Goal succeeded`。
 - 三点轨迹（起点、障碍前检查点、终点）：发送器报告 `tracking route point 1/3`、`2/3`，车辆绕过中心箱体后返回 `Nav2 route completed successfully`；`/cmd_vel_nav`、`/cmd_vel_smoothed` 和最终 `/model/ackermann_car/cmd_vel` 均出现正向速度。
+- 未知障碍：静态地图内部完全空白，路线只有 `(-3.5,0) → (3.5,0)`；`/scan_nav` 实测 1024 条射线中有 227 个有效回波，局部 VoxelLayer 在 `x≈0.30、y=-0.43…0.43` 标记中心箱体，全局规划绕行后返回 `Goal succeeded`。最终静止位置约为 `(3.346,0.067)`，速度为 0。
 - 传感器基线：MID-360 样式雷达约 10 Hz，三维点云频率受 Gazebo GPU 渲染和 bridge 影响；RGB-D 接收频率同样受渲染影响，不能直接作为实机性能承诺。
 
 ## 动力学验收与场景矩阵
@@ -100,12 +101,13 @@ ros2 launch ackermann_line_following_bringup dynamics_test.launch.py \
 
 无桌面环境可使用 `use_rviz:=false` 和 `gz_args:='-r -s <install>/.../dynamics_test.sdf'`；报告默认写到 `/tmp/ackermann_dynamics_result.json`，`/dynamics_trajectory` 与 `/dynamics_phase` 可直接在 RViz 观察。
 
-静态地图提供三种可重复场景，统一使用 `/scan`、全局/局部 costmap、Smac Hybrid-A*、Regulated Pure Pursuit 和 Collision Monitor：
+静态地图提供四种可重复场景，统一使用 `/scan/points`、全局/局部 VoxelLayer、Smac Hybrid-A*、Regulated Pure Pursuit 和 Collision Monitor：
 
 | 场景 | 路线 | 验收用途 |
 | --- | --- | --- |
 | `straight` | `(-3.5,0) → (-2.0,0)` | 空载短直线和基本前进 |
-| `obstacle` | `(-3.5,0) → (-1.5,-0.9) → (3.5,0)` | 中心障碍实时雷达绕行 |
+| `obstacle` | `(-3.5,0) → (-1.5,-0.9) → (3.5,0)` | 已知地图障碍回归 |
+| `unknown_obstacle` | `(-3.5,0) → (3.5,0)` | 空白地图中的未知中心障碍感知与绕行 |
 | `offset` | `(-3.5,0) → (-1.5,0) → (3.0,1.2)` | 非零横向终点和姿态跟踪 |
 
 ```zsh
@@ -115,9 +117,11 @@ ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=obstacle use_rviz:=true
 ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=offset use_rviz:=true
+ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
+  scenario:=unknown_obstacle use_rviz:=true
 ```
 
-`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan`、`/scan/points`、RGB-D 点云和图像、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。MID-360 点云使用 RViz `AxisColor` 按 Z 高度着色，点尺寸为 3 像素并保留 0.25 秒衰减，便于观察垂直层；实车接入 Livox 驱动时可改回官方常用的强度彩虹色。
+`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan_nav`、`/scan/points`、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；Nav2 启动时关闭未参与导航的 RGB-D 渲染。动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。MID-360 点云使用 RViz `AxisColor` 按 Z 高度着色，点尺寸为 3 像素并保留 0.25 秒衰减，便于观察垂直层；实车接入 Livox 驱动时可改回官方常用的强度彩虹色。
 
 ## 开源路线与下一步
 

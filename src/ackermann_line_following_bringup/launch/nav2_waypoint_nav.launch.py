@@ -64,6 +64,7 @@ def generate_launch_description() -> LaunchDescription:
             'enable_line_follower': 'false',
             'enable_waypoint_nav': 'false',
             'enable_ackermann_adapter': 'false',
+            'enable_rgbd': 'false',
             'target_speed': target_speed,
         }.items(),
     )
@@ -104,6 +105,36 @@ def generate_launch_description() -> LaunchDescription:
                 'use_sim_time': True,
                 'autostart': True,
                 'node_names': ['map_server'],
+            }
+        ],
+    )
+
+    # Gazebo's multi-layer GPU lidar publishes useful obstacle returns in the
+    # PointCloud2 stream. Project a ground-filtered height band to LaserScan
+    # for Nav2 plugins that require a two-dimensional scan.
+    lidar_scan_projection = Node(
+        package='pointcloud_to_laserscan',
+        executable='pointcloud_to_laserscan_node',
+        name='mid360_scan_projection',
+        output='screen',
+        remappings=[
+            ('cloud_in', '/scan/points'),
+            ('scan', '/scan_nav'),
+        ],
+        parameters=[
+            {
+                'use_sim_time': True,
+                'target_frame': 'base_footprint',
+                'transform_tolerance': 0.1,
+                'min_height': 0.08,
+                'max_height': 1.80,
+                'angle_min': -3.141592653589793,
+                'angle_max': 3.141592653589793,
+                'angle_increment': 0.006135923151543,
+                'scan_time': 0.1,
+                'range_min': 0.12,
+                'range_max': 12.0,
+                'use_inf': True,
             }
         ],
     )
@@ -213,6 +244,7 @@ def generate_launch_description() -> LaunchDescription:
             map_to_odom,
             map_server,
             map_lifecycle,
+            lidar_scan_projection,
             navigation,
             route_sender,
             rviz,

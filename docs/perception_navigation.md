@@ -4,11 +4,11 @@
 
 ## 1. 已确定的传感器基线
 
-当前仿真使用 **MID-360 样式三维雷达 + 前向 RGB-D + 轮式里程计**，同时保留 `/scan` 水平 LaserScan 接口以兼容现有 Nav2 和循迹避障节点。实车增加 IMU，与编码器融合。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
+当前仿真使用 **MID-360 样式三维雷达 + 前向 RGB-D + 轮式里程计**。Gazebo 原生 `/scan` 对多层雷达没有产生有效二维回波，因此导航使用 `/scan/points`，并通过 `pointcloud_to_laserscan` 生成经过高度裁剪的 `/scan_nav`。实车增加 IMU，与编码器融合。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
 
 | 部件 | 本次仿真配置 | 用途与实车候选 |
 | --- | --- | --- |
-| MID-360 样式雷达 | 水平 1024 点 × 垂直 20 层，10 Hz，0.12–12 m，水平 360°、垂直 -7°…+52°，高 0.36 m，1 cm 高斯噪声；同时发布 `/scan` 与 `/scan/points` | 三维点云、平面投影、低矮/悬空障碍；实车候选 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) |
+| MID-360 样式雷达 | 水平 1024 点 × 垂直 20 层，10 Hz，0.12–12 m，水平 360°、垂直 -7°…+52°，高 0.36 m，1 cm 高斯噪声；发布 `/scan/points`，再投影为 `/scan_nav` | 三维点云、平面投影、低矮/悬空障碍；实车候选 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) |
 | RGB-D | 640×480，15 Hz，水平视场约 69.4°，0.2–8 m；前移 0.36 m，高 0.41 m | 彩色点云、低矮/悬空障碍、三维重建；候选 [RealSense D435i](https://www.realsenseai.com/cn/products/d435i/)，带 IMU |
 | 原 RGB 相机 | 640×360，30 Hz，向下倾斜 | 循迹回归测试，不作为前向建图相机 |
 | 里程计/IMU | 仿真导航使用 Gazebo `OdometryPublisher` 的模型位姿；原生轮积分输出另存为 `/model/ackermann_car/wheel_odometry`；本次未新增 IMU 仿真 | 实车编码器 + IMU，经 robot_localization 输出连续 odom |
@@ -69,8 +69,8 @@ TF 实测可查询 `odom -> rgbd_optical_frame`，平移约 (0.36, 0, 0.41)，�
 ## 4. 导航实现思路
 
 1. 仿真已用已知静态地图验证 Nav2 到点和绕障；实车使用 SLAM Toolbox 建二维地图，定位阶段可用 AMCL。TF 为 `map -> odom -> base_footprint -> base_link -> sensors`。每条动态 TF 只允许一个发布源：启用 EKF 后应关闭 Gazebo 对同一 odom TF 的桥接。
-2. RGB-D 经同步、地面过滤、高度裁剪与体素降采样生成障碍点云，加入 Nav2 的局部 voxel/obstacle layer；雷达提供平面障碍。三维重建由 RTAB-Map 独立验证，同一时刻不能和另一个 SLAM 同时争用 `map -> odom`。
-3. 当前仿真已经采用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，局部采用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/controller_plugins/configuring_regulated_pp/)，并由 [Collision Monitor](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/core_servers/collision_monitor/configuring_collision_monitor_node/) 对激光近场限速/停车。先只向前行驶，禁用原地旋转及 spin 恢复；需要倒车时再配置 Reeds-Shepp 和倒车跟踪。
+2. MID-360 点云经过高度裁剪后生成 `/scan_nav`，同时直接进入 Nav2 的全局和局部 VoxelLayer。RGB-D 暂时关闭，完成方向、同步和噪声验收后再作为近场补盲。三维重建由 RTAB-Map 独立验证，同一时刻不能和另一个 SLAM 同时争用 `map -> odom`。
+3. 当前仿真已经采用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，局部采用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/controller_plugins/configuring_regulated_pp/)，并由 [Collision Monitor](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/core_servers/collision_monitor/configuring_collision_monitor_node/) 对 `/scan_nav` 近场限速/停车。先只向前行驶，禁用原地旋转及 spin 恢复；需要倒车时再配置 Reeds-Shepp 和倒车跟踪。
 4. 轴距 0.56 m、转角上限 0.55 rad，由单轨模型计算转弯半径约 0.91 m；仿真搜索半径取 0.90 m，执行层仍受 Gazebo 的 0.55 rad 转角上限约束，实车应以实测转弯半径校正。车体参考点目前在车身中心，实车以后轴为控制参考时要统一 TF 与模型定义。碰撞 footprint 覆盖车身和轮胎，不能只用车身宽 0.48 m。
 5. 控制接入新增 Twist 到 Ackermann 适配：`delta = atan(L * omega / v)`，限转角、转角速度与加速度；低速除零处理、超时停车和控制源仲裁必需。现有适配方向相反，不能直接作为 Nav2 到实车的适配器。导航时关闭循迹，防止两个节点同时发命令。
 6. 已验证已知地图上的短直线到点、中心障碍绕行和终点停车，再做在线建图导航。初始限速 0.1–0.2 m/s，验收至少包含 20 次目标点任务、动态障碍和感知掉线停车。

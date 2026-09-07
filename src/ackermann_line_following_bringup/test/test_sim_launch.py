@@ -17,6 +17,7 @@ def test_sim_launch_exposes_stationary_mode():
     assert {
         'enable_line_follower',
         'enable_waypoint_nav',
+        'enable_rgbd',
         'start_x',
         'start_y',
         'gz_args',
@@ -71,6 +72,48 @@ def test_nav2_launch_uses_open_source_navigation_stack():
     names = {entity.name for entity in description.entities
              if isinstance(entity, DeclareLaunchArgument)}
     assert {'waypoint_file', 'send_waypoints', 'use_rviz', 'entity_name'} <= names
+
+    launch_text = path.read_text(encoding='utf-8')
+    assert "package='pointcloud_to_laserscan'" in launch_text
+    assert "('cloud_in', '/scan/points')" in launch_text
+    assert "('scan', '/scan_nav')" in launch_text
+
+
+def test_nav2_uses_projected_scan_and_3d_voxel_layer():
+    bringup_dir = Path(__file__).parents[1]
+    params = (bringup_dir / 'config' / 'nav2_ackermann_params.yaml').read_text(
+        encoding='utf-8'
+    )
+    assert 'topic: "/scan_nav"' in params
+    assert 'plugin: "nav2_costmap_2d::VoxelLayer"' in params
+    assert 'topic: /scan/points' in params
+    assert 'polygons: ["PolygonStop", "PolygonSlow", "FootprintApproach"]' in params
+
+
+def test_unknown_obstacle_scenario_uses_free_static_map():
+    bringup_dir = Path(__file__).parents[1]
+    scenario_launch = (
+        bringup_dir / 'launch' / 'static_map_scenarios.launch.py'
+    ).read_text(encoding='utf-8')
+    free_map = (bringup_dir / 'maps' / 'free_navigation.yaml').read_text(
+        encoding='utf-8'
+    )
+    assert "'unknown_obstacle'" in scenario_launch
+    assert "'free_navigation.yaml'" in scenario_launch
+    assert 'image: free_navigation.pgm' in free_map
+
+    pgm_lines = (bringup_dir / 'maps' / 'free_navigation.pgm').read_text(
+        encoding='ascii'
+    ).splitlines()
+    pixels = [int(value) for line in pgm_lines[4:] for value in line.split()]
+    width, height = 200, 160
+    interior = [
+        pixels[y * width + x]
+        for y in range(2, height - 2)
+        for x in range(2, width - 2)
+    ]
+    assert len(pixels) == width * height
+    assert set(interior) == {254}
 
 
 def test_dynamics_launch_exposes_report_and_rviz_controls():

@@ -44,6 +44,7 @@ def generate_launch_description() -> LaunchDescription:
     waypoint_file = LaunchConfiguration('waypoint_file')
     target_speed = LaunchConfiguration('target_speed')
     enable_ackermann_adapter = LaunchConfiguration('enable_ackermann_adapter')
+    enable_rgbd = LaunchConfiguration('enable_rgbd')
     max_speed = LaunchConfiguration('max_speed')
     max_acceleration = LaunchConfiguration('max_acceleration')
     max_deceleration = LaunchConfiguration('max_deceleration')
@@ -54,7 +55,10 @@ def generate_launch_description() -> LaunchDescription:
 
     robot_description = {
         'robot_description': ParameterValue(
-            Command(['xacro ', robot_description_file]),
+            Command([
+                'xacro ', robot_description_file,
+                ' enable_rgbd:=', enable_rgbd,
+            ]),
             value_type=str,
         ),
         'use_sim_time': True,
@@ -264,6 +268,11 @@ def generate_launch_description() -> LaunchDescription:
                     'Convert AckermannDriveStamped to the Gazebo Twist topic. '
                     'Disable when Nav2 publishes the final Twist.'
                 ),
+            ),
+            DeclareLaunchArgument(
+                'enable_rgbd',
+                default_value='true',
+                description='Spawn the RGB-D sensor; disable it when unused.',
             ),
             DeclareLaunchArgument('target_speed', default_value='0.18'),
             DeclareLaunchArgument(

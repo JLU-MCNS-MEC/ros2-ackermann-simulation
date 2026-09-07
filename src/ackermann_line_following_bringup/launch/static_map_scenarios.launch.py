@@ -28,9 +28,13 @@ def _scenario_launch(context, *args, **kwargs):
         'ackermann_line_following_controller'
     )
     scenarios = {
-        'straight': 'nav2_short_straight.csv',
-        'offset': 'nav2_offset_goal.csv',
-        'obstacle': 'nav2_trajectory.csv',
+        'straight': ('nav2_short_straight.csv', 'waypoint_obstacle.yaml'),
+        'offset': ('nav2_offset_goal.csv', 'waypoint_obstacle.yaml'),
+        'obstacle': ('nav2_trajectory.csv', 'waypoint_obstacle.yaml'),
+        'unknown_obstacle': (
+            'nav2_unknown_obstacle.csv',
+            'free_navigation.yaml',
+        ),
     }
     if scenario not in scenarios:
         available = ', '.join(sorted(scenarios))
@@ -41,9 +45,10 @@ def _scenario_launch(context, *args, **kwargs):
     world = os.path.join(
         description_share, 'worlds', 'waypoint_obstacle.sdf'
     )
-    route = os.path.join(controller_share, 'config', scenarios[scenario])
+    route_name, map_name = scenarios[scenario]
+    route = os.path.join(controller_share, 'config', route_name)
     map_file = os.path.join(
-        bringup_share, 'maps', 'waypoint_obstacle.yaml'
+        bringup_share, 'maps', map_name
     )
     nav_launch = os.path.join(
         bringup_share, 'launch', 'nav2_waypoint_nav.launch.py'
@@ -71,8 +76,10 @@ def generate_launch_description() -> LaunchDescription:
         [
             DeclareLaunchArgument(
                 'scenario',
-                default_value='obstacle',
-                description='One of straight, offset or obstacle.',
+                default_value='unknown_obstacle',
+                description=(
+                    'One of straight, offset, obstacle or unknown_obstacle.'
+                ),
             ),
             DeclareLaunchArgument(
                 'send_waypoints',

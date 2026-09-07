@@ -94,7 +94,7 @@ Visualization Manager:
       Queue Size: 10
       Size (Pixels): 3
       Style: Flat Squares
-      Topic: /scan
+      Topic: /scan_nav
       Use Fixed Frame: true
       Value: true
     - Alpha: 0.8
