@@ -54,7 +54,6 @@ def _scenario_launch(context, *args, **kwargs):
             PythonLaunchDescriptionSource(nav_launch),
             launch_arguments={
                 'world_name': 'waypoint_obstacle',
-                'world_file': world,
                 'map_file': map_file,
                 'gz_args': gz_args,
                 'waypoint_file': route,

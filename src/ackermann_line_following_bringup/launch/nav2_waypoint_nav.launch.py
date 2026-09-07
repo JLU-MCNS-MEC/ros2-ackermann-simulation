@@ -46,7 +46,6 @@ def generate_launch_description() -> LaunchDescription:
     entity_name = LaunchConfiguration('entity_name')
     target_speed = LaunchConfiguration('target_speed')
     gz_args = LaunchConfiguration('gz_args')
-    world_file = LaunchConfiguration('world_file')
     map_file = LaunchConfiguration('map_file')
     start_x = LaunchConfiguration('start_x')
     start_y = LaunchConfiguration('start_y')
@@ -173,13 +172,8 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 'gz_args',
-                default_value=['-r ', world_file],
+                default_value=f'-r {default_world}',
                 description='Gazebo arguments; add -s for a headless server run.',
-            ),
-            DeclareLaunchArgument(
-                'world_file',
-                default_value=default_world,
-                description='SDF world file matching world_name.',
             ),
             DeclareLaunchArgument(
                 'map_file',
