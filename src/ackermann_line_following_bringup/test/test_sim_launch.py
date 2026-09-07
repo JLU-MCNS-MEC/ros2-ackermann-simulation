@@ -33,6 +33,24 @@ def test_sim_launch_exposes_stationary_mode():
     } <= names
 
 
+def test_sim_launch_uses_mid360_scan_and_pointcloud_bridge():
+    bringup_dir = Path(__file__).parents[1]
+    urdf = (
+        bringup_dir.parent / 'ackermann_line_following_description'
+        / 'urdf' / 'ackermann_car.urdf.xacro'
+    ).read_text(encoding='utf-8')
+    bridge = (bringup_dir / 'launch' / 'sim.launch.py').read_text(
+        encoding='utf-8'
+    )
+    assert '<sensor name="mid360" type="gpu_lidar">' in urdf
+    assert '<vertical>' in urdf
+    assert '<samples>20</samples>' in urdf
+    assert (
+        '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'
+        in bridge
+    )
+
+
 def test_nav2_launch_uses_open_source_navigation_stack():
     path = Path(__file__).parents[1] / 'launch' / 'nav2_waypoint_nav.launch.py'
     spec = importlib.util.spec_from_file_location('nav2_launch', path)

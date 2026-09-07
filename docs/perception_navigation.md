@@ -4,11 +4,11 @@
 
 ## 1. 已确定的传感器基线
 
-按当前室内低速仿真选择 **360° 二维雷达 + 前向 RGB-D + 轮式里程计**，保留向下的循迹 RGB 相机。实车增加 IMU，与编码器融合。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
+当前仿真使用 **MID-360 样式三维雷达 + 前向 RGB-D + 轮式里程计**，同时保留 `/scan` 水平 LaserScan 接口以兼容现有 Nav2 和循迹避障节点。实车增加 IMU，与编码器融合。预算、户外使用和算力尚未给出，因此下面型号为候选，仿真参数并非厂家参数复刻。
 
 | 部件 | 本次仿真配置 | 用途与实车候选 |
 | --- | --- | --- |
-| 二维雷达 | 720 点，10 Hz，0.12–12 m，水平 360°，高 0.52 m，1 cm 高斯噪声 | 平面 SLAM、障碍边界；候选 [RPLIDAR S2](https://www.slamtec.com/en/s2/)，官方典型转速 10 Hz |
+| MID-360 样式雷达 | 水平 1024 点 × 垂直 20 层，10 Hz，0.12–12 m，水平 360°、垂直 -7°…+52°，高 0.36 m，1 cm 高斯噪声；同时发布 `/scan` 与 `/scan/points` | 三维点云、平面投影、低矮/悬空障碍；实车候选 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) |
 | RGB-D | 640×480，15 Hz，水平视场约 69.4°，0.2–8 m；前移 0.36 m，高 0.41 m | 彩色点云、低矮/悬空障碍、三维重建；候选 [RealSense D435i](https://www.realsenseai.com/cn/products/d435i/)，带 IMU |
 | 原 RGB 相机 | 640×360，30 Hz，向下倾斜 | 循迹回归测试，不作为前向建图相机 |
 | 里程计/IMU | 仿真导航使用 Gazebo `OdometryPublisher` 的模型位姿；原生轮积分输出另存为 `/model/ackermann_car/wheel_odometry`；本次未新增 IMU 仿真 | 实车编码器 + IMU，经 robot_localization 输出连续 odom |

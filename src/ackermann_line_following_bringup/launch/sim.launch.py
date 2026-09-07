@@ -144,6 +144,7 @@ def generate_launch_description() -> LaunchDescription:
             '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
             '/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+            '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
             '/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',

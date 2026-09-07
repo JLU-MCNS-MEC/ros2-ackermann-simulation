@@ -43,7 +43,8 @@ ros2 run ackermann_line_following_controller nav2_waypoint_sender
 ## 当前导航架构
 
 ```text
-/scan (360° LaserScan) ─────┐
+/scan (MID-360 horizontal LaserScan) ─────┐
+ /scan/points (MID-360 PointCloud2) ──────┤
                             ├─ global/local costmap + inflation
 waypoint CSV → NavigateThroughPoses
                             ├─ Smac Hybrid-A* (DUBIN, search radius 0.90 m)
@@ -78,13 +79,13 @@ odom ── base_footprint ── base_link ── lidar_link / rgbd_optical_fra
 
 ## 雷达为什么看起来只有一侧
 
-`/scan` 的配置是 `-π…π`、720 点、10 Hz，确实是 360°。空旷方向没有实体碰撞体，LaserScan 返回 `inf`，RViz 不绘制无回波点，所以原 `line_track` 场景看起来像只有一侧。`waypoint_obstacle.sdf` 增加了中心、左侧和右侧实体箱体；在 RViz 中把 Fixed Frame 设为 `odom`、打开 `LaserScan` 即可看到环向回波。
+`/scan` 仍保留为 Nav2 兼容的水平 LaserScan，配置是 `-π…π`、1024 点、10 Hz；同一 MID-360 样式传感器增加了 20 层垂直扫描（-7°…+52°），并通过 `/scan/points` 发布三维 PointCloud2。空旷方向没有实体碰撞体，LaserScan 返回 `inf`，RViz 不绘制无回波点，所以原 `line_track` 场景看起来像只有一侧。`waypoint_obstacle.sdf` 增加了中心、左侧和右侧实体箱体；在 RViz 中打开 `LaserScan` 和 `MID360 PointCloud` 可分别检查平面兼容接口和三维回波。
 
 ## 已完成的实测
 
 - 短直线路径 `(-3.5,0) → (-2.0,0)`：Nav2 到达并返回 `Goal succeeded`。
 - 三点轨迹（起点、障碍前检查点、终点）：发送器报告 `tracking route point 1/3`、`2/3`，车辆绕过中心箱体后返回 `Nav2 route completed successfully`；`/cmd_vel_nav`、`/cmd_vel_smoothed` 和最终 `/model/ackermann_car/cmd_vel` 均出现正向速度。
-- 传感器基线：雷达约 9.76 Hz，RGB 约 8.15 Hz，深度约 11.14 Hz，点云约 9.38 Hz。RGB-D 接收频率仍受 Gazebo 渲染和 bridge 影响，不能直接作为实机性能承诺。
+- 传感器基线：MID-360 样式雷达约 10 Hz，三维点云频率受 Gazebo GPU 渲染和 bridge 影响；RGB-D 接收频率同样受渲染影响，不能直接作为实机性能承诺。
 
 ## 动力学验收与场景矩阵
 
@@ -116,7 +117,7 @@ ros2 launch ackermann_line_following_bringup static_map_scenarios.launch.py \
   scenario:=offset use_rviz:=true
 ```
 
-`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan`、RGB-D 点云和图像、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。
+`perception.rviz` 已预置静态地图、全局/局部 costmap、`/scan`、`/scan/points`、RGB-D 点云和图像、TF、发送路线、`/plan`、`/local_plan` 以及 Collision Monitor 的停止/减速多边形；动力学场景使用 `dynamics.rviz` 额外显示实测路径和当前阶段标记。
 
 ## 开源路线与下一步
 
