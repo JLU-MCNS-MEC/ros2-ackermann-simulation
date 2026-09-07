@@ -2,7 +2,7 @@
 
 新增雷达、前向 RGB-D 与静态测距场景，详见 [感知测试与导航路线](docs/perception_navigation.md)。
 
-轨迹点跟踪和激光避障实例见 [waypoint_obstacle_avoidance.md](docs/waypoint_obstacle_avoidance.md)。
+轨迹点跟踪和激光避障实例见 [Nav2 轨迹点与避障说明](docs/waypoint_obstacle_avoidance.md)。
 
 这是一个面向 Ubuntu 24.04 的 ROS 2 Jazzy + Gazebo Harmonic 示例。车辆模型、赛道、桥接和循迹控制分开，后续替换车型时不需要重写循迹节点。
 
@@ -23,6 +23,15 @@ ros2 launch ackermann_line_following_bringup sim.launch.py
 ros2 launch ackermann_line_following_bringup sim.launch.py line_speed:=0.10
 ```
 
+感知导航实例使用 Nav2 的 Smac Hybrid-A*、Regulated Pure Pursuit、costmap 和 Collision Monitor：
+
+```bash
+ros2 launch ackermann_line_following_bringup nav2_waypoint_nav.launch.py \
+  send_waypoints:=true use_rviz:=true
+```
+
+导航启动会关闭视觉循迹，确保只有 Nav2 向底盘发布速度。当前分支的仿真验证路线会绕过中心障碍并在终点停车；传感器、TF、故障定位和开源方案比较见 [感知测试与导航路线](docs/perception_navigation.md)。
+
 查看相机画面可以另开终端执行：
 
 ```bash
@@ -40,6 +49,8 @@ ros2 topic list
 ros2 topic hz /camera/image_raw
 ros2 topic echo /cmd_ackermann
 ros2 topic echo /model/ackermann_car/odometry
+ros2 topic echo /model/ackermann_car/wheel_odometry
+ros2 topic echo /scan
 ```
 
 也可以手动给控制器发送阿克曼指令：

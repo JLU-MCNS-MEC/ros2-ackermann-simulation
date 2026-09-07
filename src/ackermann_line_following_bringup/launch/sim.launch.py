@@ -43,6 +43,7 @@ def generate_launch_description() -> LaunchDescription:
     line_speed = LaunchConfiguration('line_speed')
     waypoint_file = LaunchConfiguration('waypoint_file')
     target_speed = LaunchConfiguration('target_speed')
+    enable_ackermann_adapter = LaunchConfiguration('enable_ackermann_adapter')
 
     robot_description = {
         'robot_description': ParameterValue(
@@ -100,6 +101,24 @@ def generate_launch_description() -> LaunchDescription:
     odometry_bridge_topic = odometry_topic + [
         '@nav_msgs/msg/Odometry@gz.msgs.Odometry',
     ]
+    # The native Ackermann plugin publishes its wheel-integrated estimate on
+    # the fixed auxiliary topic configured in the URDF. Keep it bridged for
+    # encoder-slip experiments while the standard odometry topic comes from
+    # Gazebo's model-pose OdometryPublisher.
+    wheel_odometry_topic = [
+        '/model/ackermann_car/wheel_odometry',
+    ]
+    wheel_odometry_bridge_topic = wheel_odometry_topic + [
+        '@nav_msgs/msg/Odometry@gz.msgs.Odometry',
+    ]
+    wheel_tf_topic = [
+        '/model/ackermann_car/wheel_tf',
+    ]
+    ground_truth_tf_topic = [
+        '/model/',
+        entity_name,
+        '/ground_truth_tf',
+    ]
     joint_state_topic = [
         '/world/',
         world_name,
@@ -122,19 +141,29 @@ def generate_launch_description() -> LaunchDescription:
             '/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
             '/rgbd/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-            ['/model/', entity_name, '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'],
+            wheel_tf_topic + [
+                '@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+            ],
             command_bridge_topic,
             odometry_bridge_topic,
+            wheel_odometry_bridge_topic,
+            ground_truth_tf_topic + [
+                '@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+            ],
             joint_state_bridge_topic,
         ],
         remappings=[
             (joint_state_topic, '/joint_states'),
-            (['/model/', entity_name, '/tf'], '/tf'),
+            # Nav2 consumes the model-pose transform. The wheel-integrated TF
+            # remains visible on /tf_wheel for comparison and debugging.
+            (ground_truth_tf_topic, '/tf'),
+            (wheel_tf_topic, '/tf_wheel'),
         ],
         output='screen',
     )
 
     ackermann_to_twist = Node(
+        condition=IfCondition(enable_ackermann_adapter),
         package='ackermann_line_following_controller',
         executable='ackermann_to_twist',
         name='ackermann_to_twist',
@@ -213,6 +242,14 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument('start_x', default_value='-2.8'),
             DeclareLaunchArgument('enable_line_follower', default_value='true'),
             DeclareLaunchArgument('enable_waypoint_nav', default_value='false'),
+            DeclareLaunchArgument(
+                'enable_ackermann_adapter',
+                default_value='true',
+                description=(
+                    'Convert AckermannDriveStamped to the Gazebo Twist topic. '
+                    'Disable when Nav2 publishes the final Twist.'
+                ),
+            ),
             DeclareLaunchArgument('target_speed', default_value='0.18'),
             DeclareLaunchArgument(
                 'waypoint_file',

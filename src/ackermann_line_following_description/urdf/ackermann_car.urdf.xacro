@@ -299,6 +299,24 @@
       <odom_publish_frequency>30</odom_publish_frequency>
       <frame_id>odom</frame_id>
       <child_frame_id>base_footprint</child_frame_id>
+      <!-- Keep wheel-integrated odometry available for encoder experiments,
+           but do not let it collide with the ground-truth navigation topic.
+           The native plugin integrates wheel angles and can drift when the
+           chassis is pushing against an obstacle. -->
+      <odom_topic>/model/ackermann_car/wheel_odometry</odom_topic>
+      <tf_topic>/model/ackermann_car/wheel_tf</tf_topic>
+    </plugin>
+    <!-- Gazebo's reference OdometryPublisher reports the simulated model pose
+         directly. It is used only by the simulation Nav2 launch so the map,
+         laser scan and base frame stay in one coordinate system. A real robot
+         replaces this topic with encoder + IMU fusion from robot_localization. -->
+    <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_publish_frequency>30</odom_publish_frequency>
+      <odom_topic>/model/ackermann_car/odometry</odom_topic>
+      <tf_topic>/model/ackermann_car/ground_truth_tf</tf_topic>
+      <dimensions>2</dimensions>
     </plugin>
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
   </gazebo>

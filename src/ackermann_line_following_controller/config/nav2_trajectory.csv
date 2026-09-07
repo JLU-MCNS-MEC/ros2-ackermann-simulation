@@ -1,0 +1,8 @@
+# Nav2 route in the map frame. The central obstacle occupies x=0.30..1.00.
+# The middle point is a checkpoint before the obstacle. Smac Hybrid-A* is
+# intentionally allowed to choose the collision-free side pass for the
+# segment to the final point from the live laser costmap; this keeps the
+# tracked route useful when an obstacle moves instead of hard-coding a detour.
+-3.5, 0.0
+-1.5, 0.0
+3.5, 0.0

@@ -4,6 +4,10 @@
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
+      <!-- Keep /clock and sensor TF at wall-clock pace. Without an explicit
+           update rate Gazebo can run ahead of ros_gz_bridge on CPU-only
+           machines, leaving Nav2 with stale transforms. -->
+      <real_time_update_rate>1000</real_time_update_rate>
     </physics>
     <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
     <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
@@ -54,7 +58,7 @@
 
     <!-- Additional off-path objects make the full 360-degree scan visible in RViz. -->
     <model name="left_obstacle">
-      <static>true</static><pose>1.8 1.7 0.35 0 0 0</pose>
+      <static>true</static><pose>1.8 2.8 0.35 0 0 0</pose>
       <link name="link">
         <collision name="collision"><geometry><box><size>0.7 0.7 0.7</size></box></geometry></collision>
         <visual name="visual"><geometry><box><size>0.7 0.7 0.7</size></box></geometry>
@@ -62,7 +66,7 @@
       </link>
     </model>
     <model name="right_obstacle">
-      <static>true</static><pose>-0.8 -1.8 0.30 0 0 0</pose>
+      <static>true</static><pose>-0.8 -2.8 0.30 0 0 0</pose>
       <link name="link">
         <collision name="collision"><geometry><box><size>0.6 0.8 0.6</size></box></geometry></collision>
         <visual name="visual"><geometry><box><size>0.6 0.8 0.6</size></box></geometry>

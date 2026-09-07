@@ -1,6 +1,6 @@
 # 感知传感器、测试与导航路线
 
-调研与本机测试日期：2026-09-05。平台：ROS 2 Jazzy / Gazebo Harmonic。
+调研与本机测试日期：2026-09-07。平台：ROS 2 Jazzy / Gazebo Harmonic。
 
 ## 1. 已确定的传感器基线
 
@@ -11,7 +11,7 @@
 | 二维雷达 | 720 点，10 Hz，0.12–12 m，水平 360°，高 0.52 m，1 cm 高斯噪声 | 平面 SLAM、障碍边界；候选 [RPLIDAR S2](https://www.slamtec.com/en/s2/)，官方典型转速 10 Hz |
 | RGB-D | 640×480，15 Hz，水平视场约 69.4°，0.2–8 m；前移 0.36 m，高 0.41 m | 彩色点云、低矮/悬空障碍、三维重建；候选 [RealSense D435i](https://www.realsenseai.com/cn/products/d435i/)，带 IMU |
 | 原 RGB 相机 | 640×360，30 Hz，向下倾斜 | 循迹回归测试，不作为前向建图相机 |
-| 里程计/IMU | 当前为 Gazebo Ackermann 里程计；本次未新增 IMU 仿真 | 实车编码器 + IMU，经 robot_localization 输出连续 odom |
+| 里程计/IMU | 仿真导航使用 Gazebo `OdometryPublisher` 的模型位姿；原生轮积分输出另存为 `/model/ackermann_car/wheel_odometry`；本次未新增 IMU 仿真 | 实车编码器 + IMU，经 robot_localization 输出连续 odom |
 
 若主要目标改为户外三维 SLAM，优先评估 [Livox MID-360](https://www.livoxtech.com/cn/mid-360/specs) + 同步相机 + IMU。其扫描模式不能用本次单线雷达仿真代表。二维雷达无法单独恢复完整三维场景；RGB-D 的 8 m 裁剪上限也不意味着实机在 8 m 仍有可靠深度。
 
@@ -55,7 +55,7 @@ export ROS_DOMAIN_ID=47
 
 脚本等待发现后采样 20 秒墙钟时间；检查五条话题、时间戳递增、中心测距误差 < 5 cm。频率门槛：雷达 ≥ 9 Hz，RGB-D 各流 ≥ 12 Hz。失败返回非零；JSON 区分 data_passed 与 rate_passed。仅用于静止、原点出生的 sensor_lab。单调时间戳不等于跨传感器已经同步。
 
-本机首轮结果：雷达 9.76 Hz，均值 3.000893 m，标准差 0.009658 m；RGB 8.15 Hz，深度 11.14 Hz，点云 9.38 Hz。深度中心为 2.640000 m，符合 3−0.36 m 的几何真值。深度未模拟实机噪声，因此极小误差不能用于硬件选购。按正式门槛复测的原始结果保存在 [sensor_lab.json](results/sensor_lab.json)。
+本机首轮结果：雷达 9.76 Hz，均值 3.000893 m，标准差 0.009658 m；RGB 8.15 Hz，深度 11.14 Hz，点云 9.38 Hz。深度中心为 2.640000 m，符合 3−0.36 m 的几何真值。深度未模拟实机噪声，因此极小误差不能用于硬件选购。按正式门槛复测的原始结果保存在 [sensor_lab.json](results/sensor_lab.json)。这些是传感器链路基线，不代表完成了实机同步验收。
 
 TF 实测可查询 `odom -> rgbd_optical_frame`，平移约 (0.36, 0, 0.41)，光学坐标方向正确。当前 RGB-D 接收频率不足，不能宣布性能验收通过。接收频率同时受渲染、bridge、DDS 和 Python 采集器影响，尚未定位瓶颈；先分别订阅图像、深度和点云，与同时订阅作对照，再比较 320×240 / 640×480，以及关闭原循迹相机渲染后的差异。
 
@@ -68,11 +68,11 @@ TF 实测可查询 `odom -> rgbd_optical_frame`，平移约 (0.36, 0, 0.41)，�
 
 ## 4. 导航实现思路
 
-1. 使用 SLAM Toolbox 建二维地图；定位阶段可用 AMCL。TF 为 `map -> odom -> base_footprint -> base_link -> sensors`。每条动态 TF 只允许一个发布源：将来启用 EKF 后应关闭 Gazebo 对同一 odom TF 的桥接。
+1. 仿真已用已知静态地图验证 Nav2 到点和绕障；实车使用 SLAM Toolbox 建二维地图，定位阶段可用 AMCL。TF 为 `map -> odom -> base_footprint -> base_link -> sensors`。每条动态 TF 只允许一个发布源：启用 EKF 后应关闭 Gazebo 对同一 odom TF 的桥接。
 2. RGB-D 经同步、地面过滤、高度裁剪与体素降采样生成障碍点云，加入 Nav2 的局部 voxel/obstacle layer；雷达提供平面障碍。三维重建由 RTAB-Map 独立验证，同一时刻不能和另一个 SLAM 同时争用 `map -> odom`。
-3. 全局采用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，局部采用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/first_time_robot_setup_guide/navigation_plugins/setup_navigation_plugins/)。先只向前行驶，禁用原地旋转及 spin 恢复；需要倒车时再配置 Reeds-Shepp 和倒车跟踪。
-4. 轴距 0.56 m、转角上限 0.55 rad，由单轨模型计算转弯半径约 0.91 m；规划初值取 ≥ 1.1 m，并以实测转弯半径校正。车体参考点目前在车身中心，实车以后轴为控制参考时要统一 TF 与模型定义。碰撞 footprint 覆盖车身和轮胎，不能只用车身宽 0.48 m。
+3. 当前仿真已经采用 [Smac Hybrid-A*](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/planners_plugins/smac/smac_hybrid/configuring_smac_hybrid/)，局部采用 [Regulated Pure Pursuit](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/controller_plugins/configuring_regulated_pp/)，并由 [Collision Monitor](https://docs.nav2.org/jazzy/configuration_and_development/configuration_guide/core_servers/collision_monitor/configuring_collision_monitor_node/) 对激光近场限速/停车。先只向前行驶，禁用原地旋转及 spin 恢复；需要倒车时再配置 Reeds-Shepp 和倒车跟踪。
+4. 轴距 0.56 m、转角上限 0.55 rad，由单轨模型计算转弯半径约 0.91 m；仿真搜索半径取 0.90 m，执行层仍受 Gazebo 的 0.55 rad 转角上限约束，实车应以实测转弯半径校正。车体参考点目前在车身中心，实车以后轴为控制参考时要统一 TF 与模型定义。碰撞 footprint 覆盖车身和轮胎，不能只用车身宽 0.48 m。
 5. 控制接入新增 Twist 到 Ackermann 适配：`delta = atan(L * omega / v)`，限转角、转角速度与加速度；低速除零处理、超时停车和控制源仲裁必需。现有适配方向相反，不能直接作为 Nav2 到实车的适配器。导航时关闭循迹，防止两个节点同时发命令。
-6. 先验证已知地图上的到点、避障、停车和不可达目标，再做在线建图导航。初始限速 0.1–0.2 m/s，验收至少包含 20 次目标点任务、动态障碍和感知掉线停车。
+6. 已验证已知地图上的短直线到点、中心障碍绕行和终点停车，再做在线建图导航。初始限速 0.1–0.2 m/s，验收至少包含 20 次目标点任务、动态障碍和感知掉线停车。
 
-本次交付范围：传感器基线、仿真接入、静态测试与开源导航设计。尚未安装/运行 SLAM Toolbox 或 RTAB-Map，未生成 SLAM 地图、重建网格或完成自主导航；本机检查两包均未安装。
+本次交付范围：传感器基线、仿真接入、Nav2 静态地图导航、静态绕障测试与开源三维/SLAM 路线设计。SLAM Toolbox 和 RTAB-Map 已安装但尚未在本车模型上完成闭环建图、重建网格和在线建图导航；这些仍是下一阶段测试。
