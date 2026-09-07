@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import sys
+import signal
 
-from python_qt_binding.QtCore import Qt, QTimer
+from python_qt_binding.QtCore import QTimer, Qt
 from python_qt_binding.QtWidgets import QApplication
 import rclpy
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
 from rqt_plot.data_plot import DataPlot
 from rqt_plot.plot_widget import PlotWidget
 
@@ -68,7 +70,17 @@ class NavigationPlotter:
         self._attach_topics()
 
     def _spin_once(self) -> None:
-        rclpy.spin_once(self.node, timeout_sec=0.0)
+        if not rclpy.ok():
+            self.spin_timer.stop()
+            QApplication.quit()
+            return
+        try:
+            rclpy.spin_once(self.node, timeout_sec=0.0)
+        except (KeyboardInterrupt, RuntimeError) as error:
+            if rclpy.ok() and not isinstance(error, KeyboardInterrupt):
+                raise
+            self.spin_timer.stop()
+            QApplication.quit()
 
     def _attach_topics(self) -> None:
         for widget, topics in self.pending:
@@ -83,18 +95,29 @@ class NavigationPlotter:
 
 def main(args=None) -> None:
     """Start the Qt event loop and rqt_plot telemetry windows."""
-    rclpy.init(args=args)
+    rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
     node = rclpy.create_node('navigation_plotter')
     application = QApplication.instance() or QApplication(sys.argv[:1])
+    previous_sigint = signal.signal(
+        signal.SIGINT, lambda signum, frame: application.quit()
+    )
+    previous_sigterm = signal.signal(
+        signal.SIGTERM, lambda signum, frame: application.quit()
+    )
     plotter = NavigationPlotter(node)
     try:
         application.exec()
     finally:
         plotter.spin_timer.stop()
         plotter.discovery_timer.stop()
-        node.destroy_node()
+        try:
+            node.destroy_node()
+        except RuntimeError:
+            pass
         if rclpy.ok():
             rclpy.shutdown()
+        signal.signal(signal.SIGINT, previous_sigint)
+        signal.signal(signal.SIGTERM, previous_sigterm)
 
 
 if __name__ == '__main__':
