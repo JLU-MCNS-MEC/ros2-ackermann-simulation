@@ -48,12 +48,12 @@ class NavigationPlotter:
         for index, (title, topics) in enumerate(plot_groups()):
             widget = PlotWidget(node)
             plot = DataPlot(widget)
+            widget.switch_data_plot_widget(plot)
             plot.set_autoscale(x=False)
             plot.set_autoscale(
                 y=DataPlot.SCALE_EXTEND | DataPlot.SCALE_VISIBLE
             )
-            plot.set_xlim([0.0, 30.0])
-            widget.switch_data_plot_widget(plot)
+            plot.set_xlim([0.0, 90.0])
             widget.setWindowTitle(title)
             widget.setGeometry(40 + index * 800, 80, 760, 430)
             widget.setWindowFlag(Qt.WindowStaysOnTopHint, True)
