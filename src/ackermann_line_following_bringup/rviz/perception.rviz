@@ -138,7 +138,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.015
       Style: Flat Squares
-      Topic: /scan/points
+      Topic: /scan/points_obstacles
       Unreliable: false
       Use Fixed Frame: true
       Value: true

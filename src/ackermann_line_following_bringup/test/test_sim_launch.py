@@ -225,5 +225,8 @@ def test_navigation_launch_wires_diagnostics_and_live_plots():
     assert "executable='navigation_diagnostics'" in launch_text
     assert "executable='navigation_plotter'" in launch_text
     assert "executable='navigation_experiment'" in launch_text
+    assert "executable='filter_passthrough_node'" in launch_text
+    assert "('output', '/scan/points_obstacles')" in launch_text
     assert 'FollowPath.desired_linear_vel' in launch_text
     assert 'Topic: /nav_diagnostics/summary' in rviz
+    assert 'Topic: /scan/points_obstacles' in rviz

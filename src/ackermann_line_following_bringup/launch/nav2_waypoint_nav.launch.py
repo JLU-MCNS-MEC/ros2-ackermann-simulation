@@ -138,6 +138,26 @@ def generate_launch_description() -> LaunchDescription:
             }
         ],
     )
+    lidar_ground_filter = Node(
+        package='pcl_ros',
+        executable='filter_passthrough_node',
+        name='mid360_ground_filter',
+        output='screen',
+        remappings=[
+            ('input', '/scan/points'),
+            ('output', '/scan/points_obstacles'),
+        ],
+        parameters=[
+            {
+                'use_sim_time': True,
+                'filter_field_name': 'z',
+                'filter_limit_min': 0.08,
+                'filter_limit_max': 1.80,
+                'filter_limit_negative': False,
+                'keep_organized': False,
+            }
+        ],
+    )
 
     navigation = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(navigation_launch),
@@ -306,6 +326,7 @@ def generate_launch_description() -> LaunchDescription:
             map_server,
             map_lifecycle,
             lidar_scan_projection,
+            lidar_ground_filter,
             navigation,
             route_sender,
             diagnostics,
