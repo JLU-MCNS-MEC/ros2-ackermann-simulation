@@ -23,6 +23,13 @@ def test_sim_launch_exposes_stationary_mode():
         'target_speed',
         'waypoint_file',
         'world_name',
+        'max_speed',
+        'max_acceleration',
+        'max_deceleration',
+        'max_steering',
+        'max_steering_rate',
+        'command_timeout',
+        'control_rate',
     } <= names
 
 
@@ -35,3 +42,31 @@ def test_nav2_launch_uses_open_source_navigation_stack():
     names = {entity.name for entity in description.entities
              if isinstance(entity, DeclareLaunchArgument)}
     assert {'waypoint_file', 'send_waypoints', 'use_rviz', 'entity_name'} <= names
+
+
+def test_dynamics_launch_exposes_report_and_rviz_controls():
+    path = Path(__file__).parents[1] / 'launch' / 'dynamics_test.launch.py'
+    spec = importlib.util.spec_from_file_location('dynamics_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {entity.name for entity in description.entities
+             if isinstance(entity, DeclareLaunchArgument)}
+    assert {'run_test', 'use_rviz', 'result_file', 'segment_scale'} <= names
+
+
+def test_static_scenario_launch_exposes_scenario_selector():
+    path = Path(__file__).parents[1] / 'launch' / 'static_map_scenarios.launch.py'
+    spec = importlib.util.spec_from_file_location('static_scenarios_launch', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    description = module.generate_launch_description()
+    names = {entity.name for entity in description.entities
+             if isinstance(entity, DeclareLaunchArgument)}
+    assert {
+        'scenario',
+        'send_waypoints',
+        'use_rviz',
+        'target_speed',
+        'gz_args',
+    } <= names

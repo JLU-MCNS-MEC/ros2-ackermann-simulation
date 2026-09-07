@@ -25,6 +25,7 @@ setup(
             'ackermann_to_twist = ackermann_line_following_controller.ackermann_to_twist_node:main',
             'waypoint_tracker = ackermann_line_following_controller.waypoint_tracker_node:main',
             'nav2_waypoint_sender = ackermann_line_following_controller.nav2_waypoint_sender:main',
+            'ackermann_dynamics_test = ackermann_line_following_controller.dynamics_test_node:main',
         ],
     },
 )

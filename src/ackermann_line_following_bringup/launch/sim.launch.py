@@ -44,6 +44,13 @@ def generate_launch_description() -> LaunchDescription:
     waypoint_file = LaunchConfiguration('waypoint_file')
     target_speed = LaunchConfiguration('target_speed')
     enable_ackermann_adapter = LaunchConfiguration('enable_ackermann_adapter')
+    max_speed = LaunchConfiguration('max_speed')
+    max_acceleration = LaunchConfiguration('max_acceleration')
+    max_deceleration = LaunchConfiguration('max_deceleration')
+    max_steering = LaunchConfiguration('max_steering')
+    max_steering_rate = LaunchConfiguration('max_steering_rate')
+    command_timeout = LaunchConfiguration('command_timeout')
+    control_rate = LaunchConfiguration('control_rate')
 
     robot_description = {
         'robot_description': ParameterValue(
@@ -176,6 +183,13 @@ def generate_launch_description() -> LaunchDescription:
                     '/cmd_vel',
                 ],
                 'wheelbase': 0.56,
+                'max_speed': max_speed,
+                'max_acceleration': max_acceleration,
+                'max_deceleration': max_deceleration,
+                'max_steering': max_steering,
+                'max_steering_rate': max_steering_rate,
+                'command_timeout': command_timeout,
+                'control_rate': control_rate,
             }
         ],
     )
@@ -251,6 +265,41 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             ),
             DeclareLaunchArgument('target_speed', default_value='0.18'),
+            DeclareLaunchArgument(
+                'max_speed',
+                default_value='0.6',
+                description='Symmetric forward/reverse speed limit (m/s).',
+            ),
+            DeclareLaunchArgument(
+                'max_acceleration',
+                default_value='1.5',
+                description='Positive acceleration limit (m/s^2).',
+            ),
+            DeclareLaunchArgument(
+                'max_deceleration',
+                default_value='1.5',
+                description='Positive braking limit (m/s^2).',
+            ),
+            DeclareLaunchArgument(
+                'max_steering',
+                default_value='0.55',
+                description='Absolute front steering limit (rad).',
+            ),
+            DeclareLaunchArgument(
+                'max_steering_rate',
+                default_value='2.0',
+                description='Absolute steering rate limit (rad/s).',
+            ),
+            DeclareLaunchArgument(
+                'command_timeout',
+                default_value='0.5',
+                description='Stop if no Ackermann command arrives (s).',
+            ),
+            DeclareLaunchArgument(
+                'control_rate',
+                default_value='50.0',
+                description='Ackermann command output rate (Hz).',
+            ),
             DeclareLaunchArgument(
                 'waypoint_file',
                 default_value=default_waypoint_file,

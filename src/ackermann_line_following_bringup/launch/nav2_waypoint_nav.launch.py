@@ -24,7 +24,9 @@ def generate_launch_description() -> LaunchDescription:
     nav2_share = get_package_share_directory('nav2_bringup')
     sim_launch = os.path.join(bringup_share, 'launch', 'sim.launch.py')
     navigation_launch = os.path.join(nav2_share, 'launch', 'navigation_launch.py')
-    world = os.path.join(description_share, 'worlds', 'waypoint_obstacle.sdf')
+    default_world = os.path.join(
+        description_share, 'worlds', 'waypoint_obstacle.sdf'
+    )
     params = os.path.join(bringup_share, 'config', 'nav2_ackermann_params.yaml')
     ackermann_to_pose_bt = os.path.join(
         bringup_share, 'behavior_trees', 'navigate_to_pose_ackermann.xml'
@@ -32,14 +34,24 @@ def generate_launch_description() -> LaunchDescription:
     ackermann_through_poses_bt = os.path.join(
         bringup_share, 'behavior_trees', 'navigate_through_poses_ackermann.xml'
     )
-    map_yaml = os.path.join(bringup_share, 'maps', 'waypoint_obstacle.yaml')
-    waypoint_file = os.path.join(controller_share, 'config', 'nav2_trajectory.csv')
-    rviz_config = os.path.join(bringup_share, 'rviz', 'perception.rviz')
+    default_map_yaml = os.path.join(
+        bringup_share, 'maps', 'waypoint_obstacle.yaml'
+    )
+    default_waypoint_file = os.path.join(
+        controller_share, 'config', 'nav2_trajectory.csv'
+    )
+    default_rviz_config = os.path.join(bringup_share, 'rviz', 'perception.rviz')
 
     world_name = LaunchConfiguration('world_name')
     entity_name = LaunchConfiguration('entity_name')
     target_speed = LaunchConfiguration('target_speed')
     gz_args = LaunchConfiguration('gz_args')
+    world_file = LaunchConfiguration('world_file')
+    map_file = LaunchConfiguration('map_file')
+    start_x = LaunchConfiguration('start_x')
+    start_y = LaunchConfiguration('start_y')
+    start_z = LaunchConfiguration('start_z')
+    rviz_config = LaunchConfiguration('rviz_config')
 
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(sim_launch),
@@ -47,9 +59,9 @@ def generate_launch_description() -> LaunchDescription:
             'world_name': world_name,
             'entity_name': entity_name,
             'gz_args': gz_args,
-            'start_x': '-3.5',
-            'start_y': '0.0',
-            'start_z': '0.02',
+            'start_x': start_x,
+            'start_y': start_y,
+            'start_z': start_z,
             'enable_line_follower': 'false',
             'enable_waypoint_nav': 'false',
             'enable_ackermann_adapter': 'false',
@@ -79,7 +91,7 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[
             {
                 'use_sim_time': True,
-                'yaml_filename': map_yaml,
+                'yaml_filename': map_file,
             }
         ],
     )
@@ -109,8 +121,14 @@ def generate_launch_description() -> LaunchDescription:
             'params_file': RewrittenYaml(
                 source_file=params,
                 param_rewrites={
-                    'bt_navigator.ros__parameters.default_nav_to_pose_bt_xml': ackermann_to_pose_bt,
-                    'bt_navigator.ros__parameters.default_nav_through_poses_bt_xml': ackermann_through_poses_bt,
+                    (
+                        'bt_navigator.ros__parameters.'
+                        'default_nav_to_pose_bt_xml'
+                    ): ackermann_to_pose_bt,
+                    (
+                        'bt_navigator.ros__parameters.'
+                        'default_nav_through_poses_bt_xml'
+                    ): ackermann_through_poses_bt,
                 },
                 root_key='',
                 convert_types=True,
@@ -155,8 +173,18 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 'gz_args',
-                default_value=f'-r {world}',
+                default_value=['-r ', world_file],
                 description='Gazebo arguments; add -s for a headless server run.',
+            ),
+            DeclareLaunchArgument(
+                'world_file',
+                default_value=default_world,
+                description='SDF world file matching world_name.',
+            ),
+            DeclareLaunchArgument(
+                'map_file',
+                default_value=default_map_yaml,
+                description='Static map YAML matching world_file.',
             ),
             DeclareLaunchArgument(
                 'entity_name',
@@ -165,8 +193,16 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 'waypoint_file',
-                default_value=waypoint_file,
+                default_value=default_waypoint_file,
                 description='CSV route sent through Nav2 NavigateThroughPoses.',
+            ),
+            DeclareLaunchArgument('start_x', default_value='-3.5'),
+            DeclareLaunchArgument('start_y', default_value='0.0'),
+            DeclareLaunchArgument('start_z', default_value='0.02'),
+            DeclareLaunchArgument(
+                'rviz_config',
+                default_value=default_rviz_config,
+                description='RViz configuration for this navigation scenario.',
             ),
             DeclareLaunchArgument('target_speed', default_value='0.22'),
             DeclareLaunchArgument(

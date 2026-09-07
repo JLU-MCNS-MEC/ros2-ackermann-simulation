@@ -1,14 +1,13 @@
 import math
 
-import pytest
-import rclpy
-
 from ackermann_line_following_controller.nav2_waypoint_sender import (
     default_waypoint_file,
     poses_from_waypoints,
     wait_for_map,
 )
 from ackermann_line_following_controller.waypoint_tracker_node import Waypoint
+import pytest
+import rclpy
 
 
 def test_poses_from_waypoints_uses_segment_heading() -> None:

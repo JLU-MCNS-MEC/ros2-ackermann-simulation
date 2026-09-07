@@ -22,7 +22,7 @@ import rclpy
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile
 from visualization_msgs.msg import Marker
 
-from .waypoint_tracker_node import Waypoint, load_waypoints
+from .waypoint_tracker_node import load_waypoints, Waypoint
 
 
 def _yaw_between(start: Waypoint, end: Waypoint, fallback: float = 0.0) -> float:
@@ -59,9 +59,12 @@ def poses_from_waypoints(
         pose.header.frame_id = frame_id
         pose.pose.position.x = waypoint.x
         pose.pose.position.y = waypoint.y
-        pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = (
-            _quaternion_from_yaw(yaw)
-        )
+        (
+            pose.pose.orientation.x,
+            pose.pose.orientation.y,
+            pose.pose.orientation.z,
+            pose.pose.orientation.w,
+        ) = _quaternion_from_yaw(yaw)
         poses.append(pose)
     return poses
 
@@ -128,6 +131,7 @@ def main(args=None) -> None:
     """Send the configured route and report the Nav2 action result."""
     rclpy.init(args=args)
     navigator = BasicNavigator(node_name='nav2_waypoint_sender')
+    route_succeeded = False
     navigator.declare_parameter('waypoint_file', default_waypoint_file())
     navigator.declare_parameter('frame_id', 'map')
     # BasicNavigator uses the literal ``robot_localization`` to mean that
@@ -146,7 +150,7 @@ def main(args=None) -> None:
         navigator.get_logger().error(f'Unable to load Nav2 route: {error}')
         navigator.destroy_node()
         rclpy.shutdown()
-        return
+        raise SystemExit(1)
 
     path_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
     path_publisher = navigator.create_publisher(PathMessage, '/trajectory', path_qos)
@@ -170,7 +174,7 @@ def main(args=None) -> None:
         navigator.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
-        return
+        raise SystemExit(1)
     if not navigator.goThroughPoses(poses):
         navigator.get_logger().error('Nav2 rejected NavigateThroughPoses goal')
     else:
@@ -197,6 +201,7 @@ def main(args=None) -> None:
         result = navigator.getResult()
         if result == TaskResult.SUCCEEDED:
             navigator.get_logger().info('Nav2 route completed successfully')
+            route_succeeded = True
         elif result == TaskResult.CANCELED:
             navigator.get_logger().warning('Nav2 route was canceled')
         else:
@@ -205,6 +210,8 @@ def main(args=None) -> None:
     navigator.destroy_node()
     if rclpy.ok():
         rclpy.shutdown()
+    if not route_succeeded:
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
