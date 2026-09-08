@@ -7,6 +7,8 @@
 实车控制接口、TF 发布权、定位建图选择和分阶段验收见
 [Sim2Real 架构与验收路线](docs/sim2real_plan.md)。
 
+后续会话请先阅读 [当前工程状态与会话交接](docs/project_handoff.md)。
+
 这是一个面向 Ubuntu 24.04 的 ROS 2 Jazzy + Gazebo Harmonic 示例。车辆模型、赛道、桥接和循迹控制分开，后续替换车型时不需要重写循迹节点。
 
 ## 启动
