@@ -12,6 +12,10 @@
 - 为加载上述配置，已完整重启仿真与导航并重新提供初始位姿；新主日志
   `/tmp/indoor_m0_launch_v2.log`，旧 RViz/Gazebo GUI 保留。以下旧会话参数覆盖描述
   仅为历史记录，当前转换器由新主 launch 管理。
+- M1 已新增只读 `rgbd_audit`，检查配准图像、内参、米/毫米深度、同步、数据完整性、
+  有效深度及采集时刻 TF；18 项单测通过，覆盖率 98%。整体 141 项测试通过。
+  尚未在启用相机的当前仿真中验收，因此 M1 不勾选。复现步骤见
+  [`multisensor_validation.md`](multisensor_validation.md)。
 
 - 已在桌面 `:1` 启动 Gazebo GUI、室内语义导航与 RViz，供用户直接观察。
 - AMCL 已接收粗略初始位姿；“办公区”目标实际成功到达。

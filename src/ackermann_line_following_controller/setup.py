@@ -21,6 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'rgbd_audit = ackermann_line_following_controller.rgbd_audit:main',
             'navigation_regression = ackermann_line_following_controller.navigation_regression:main',
             'semantic_navigation = ackermann_line_following_controller.semantic_navigation_node:main',
             'line_follower = ackermann_line_following_controller.line_follower_node:main',
