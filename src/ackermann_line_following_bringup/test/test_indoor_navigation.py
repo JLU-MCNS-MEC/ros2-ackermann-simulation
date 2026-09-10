@@ -97,6 +97,9 @@ def test_indoor_rviz_uses_map_for_initial_pose_and_named_goals():
     manager = config['Visualization Manager']
     assert manager['Global Options']['Fixed Frame'] == 'map'
     assert any(tool['Class'] == 'nav2_rviz_plugins/GoalTool' for tool in manager['Tools'])
+    # GoalTool emits a Qt signal; the Nav2 panel owns the action client.
+    assert any(panel['Class'] == 'nav2_rviz_plugins/Navigation 2'
+               for panel in config['Panels'])
     marker = next(display for display in manager['Displays']
                   if display.get('Name') == 'Semantic Approach Poses')
     assert marker['Topic']['Durability Policy'] == 'Transient Local'

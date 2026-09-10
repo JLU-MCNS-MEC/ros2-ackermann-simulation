@@ -10,6 +10,9 @@
   `/tmp/indoor_visual_20260910.rviz` 使用更远俯视视角并隐藏未启用的 RGB-D 面板。
 - 演示保持运行；主日志 `/tmp/indoor_visual_demo.log`，Gazebo GUI 日志
   `/tmp/indoor_visual_gazebo.log`，独立 RViz 日志 `/tmp/indoor_visual_rviz.log`。
+- 用户点击目标无反应的原因已定位：`nav2_rviz_plugins/GoalTool` 只通知 Nav2 面板，
+  原配置缺少 `Navigation 2` 面板。已补齐正式与当前临时配置并增加配对检查测试；
+  仅重启 RViz，仿真与 AMCL 保持运行。
 
 ## 当前开发：100 平方米语义导航
 
