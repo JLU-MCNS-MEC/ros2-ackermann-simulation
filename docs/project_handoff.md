@@ -24,6 +24,12 @@
 
 ## 当前开发：100 平方米语义导航
 
+- 后续多传感器路线已整理为
+  [`multisensor_fusion_plan.md`](multisensor_fusion_plan.md)，并在主 TODO 中增加 M0–M10。
+  推荐先 RGB-D 障碍/语义观测，再 RTAB-Map 旁路三维闭环；融合定位需独立消融验收。
+  官方开源选型已核查；本机 RTX 4060 Ti 约 8 GB；当前激光点云缺逐点时间，
+  不能直接标记 FAST-LIO/FAST-LIVO2 时序与去畸变已适配。尚未引入这些新依赖。
+
 - 功能分支：`feature/semantic-navigation-100sqm`；完整清单见
   [`navigation_semantic_todo.md`](navigation_semantic_todo.md)。
 - 新增 `indoor_navigation.launch.py`：10 × 10 m 场景、EKF、Slam Toolbox、独立

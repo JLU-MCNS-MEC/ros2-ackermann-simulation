@@ -3,6 +3,10 @@
 更新日期：2026-09-07。本文件区分已经跑通的仿真能力、已实现但尚未接硬件的接口，
 以及必须在实车上测量的项目。不能用 Gazebo 真值或理想传感器数据代替实车验收。
 
+2026-09-10 补充：下文初始差距表是历史基线，二维 SLAM/AMCL 的最新状态以
+[`project_handoff.md`](project_handoff.md) 为准；新增多传感器路线与开源核查见
+[`multisensor_fusion_plan.md`](multisensor_fusion_plan.md)。
+
 ## 1. 当前差距
 
 | 子系统 | 当前状态 | 实车前必须补齐 | 优先级 |
