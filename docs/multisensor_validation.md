@@ -52,7 +52,8 @@ ros2 launch ackermann_line_following_bringup indoor_semantic.launch.py \
   enable_rgbd:=true target_speed:=0.35 use_rviz:=true
 
 ros2 run ackermann_line_following_controller rgbd_audit \
-  --output /tmp/rgbd_audit_unique.json --seconds 120 --minimum-samples 300 --use-sim-time
+  --output /tmp/rgbd_audit_unique.json --seconds 120 --minimum-samples 300 \
+  --use-sim-time --reliable
 ```
 
 工具只订阅，不输出车辆命令。同步 `/rgbd/image`、`/rgbd/depth_image`、
@@ -61,9 +62,17 @@ ros2 run ackermann_line_following_controller rgbd_audit \
 并在采集时刻查询 `map -> camera`。TF 等待限 0.3 s，不用最新位姿代替缺失历史位姿。
 仿真相机固有配准/理想内参通过，不代表实车外参和深度尺度已标定。
 
+上述 `--reliable` 适用于当前已确认 RELIABLE 的 Gazebo 图像发布者，可显著减少
+大图像接收缺帧。真实驱动若是 BEST_EFFORT 发布，不能使用该选项；先检查
+`ros2 topic info /rgbd/image --verbose` 等输出，并采用匹配的 QoS。
+导航点云桥与两个扫描投影节点现放在同一个 `lidar_pipeline` 容器内，
+开启进程内通信，避免安全扫描生成前的大点云跨进程丢失；算法与高度范围未改变。
+
 默认验收门槛：至少 300 组，匹配比例 ≥ 90%，有效数据对 ≥ 95%，采集时刻 TF
 成功率 ≥ 99%，同步偏差 P95 ≤ 20 ms，有效深度比例中位数 ≥ 10%，无非单调时间戳，
-各流最大接收间隔与最终接收年龄 ≤ 0.5 s。失败返回非零退出码，结果仍保存。
+各流最大接收间隔与最终接收年龄 ≤ 0.5 s。最新工具还要求数据年龄 P95 ≤ 0.2 s，
+不接受超前超过 20 ms 的帧；该年龄按 ROS 时钟计算，不是墙钟。
+失败返回非零退出码，结果仍保存。
 场景正常空洞会降低深度比例；无效/缺失深度不会被解释为自由空间。
 
 分别做静止与运动检查，并将视觉负载下导航表现与 M0 比较；首次没有达到门槛时

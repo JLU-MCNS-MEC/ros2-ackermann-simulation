@@ -149,7 +149,6 @@ def generate_launch_description() -> LaunchDescription:
             '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
             '/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
             '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
-            '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
             '/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU',
             '/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
@@ -173,6 +172,14 @@ def generate_launch_description() -> LaunchDescription:
             (ground_truth_tf_topic, ground_truth_tf_output),
             (wheel_tf_topic, '/tf_wheel'),
         ],
+        output='screen',
+    )
+
+    pointcloud_bridge = Node(
+        condition=IfCondition(LaunchConfiguration('bridge_lidar_points')),
+        package='ros_gz_bridge', executable='parameter_bridge',
+        name='pointcloud_bridge',
+        arguments=['/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'],
         output='screen',
     )
 
@@ -331,10 +338,12 @@ def generate_launch_description() -> LaunchDescription:
                 default_value='0.18',
                 description='Forward speed for the built-in line follower (m/s).',
             ),
+            DeclareLaunchArgument('bridge_lidar_points', default_value='true'),
             gazebo,
             robot_state_publisher,
             spawn,
             bridge,
+            pointcloud_bridge,
             ackermann_to_twist,
             line_follower,
             waypoint_tracker,

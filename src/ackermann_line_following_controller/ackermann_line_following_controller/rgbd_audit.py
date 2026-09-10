@@ -13,7 +13,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import QoSProfile, qos_profile_sensor_data
 from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, Image
 from tf2_ros import Buffer, TransformException, TransformListener
@@ -57,12 +57,16 @@ def audit_summary(samples, errors, received, minimum_samples):
     total = len(samples) + sum(errors.values())
     p95 = float(np.percentile([s['sync_delta_s'] for s in samples], 95)) if samples else None
     depth_fraction = float(np.median([s['valid_fraction'] for s in samples])) if samples else None
+    ages = [s['frame_age_s'] for s in samples]
+    age_p95 = float(np.percentile(ages, 95)) if ages else None
     maximum_received = max((s['count'] for s in received.values()), default=0)
     gates = {
         'enough_samples': len(samples) >= minimum_samples,
         'valid_pairs': bool(total) and len(samples) / total >= 0.95,
         'acquisition_tf': bool(samples) and len(valid) / len(samples) >= 0.99,
         'sync_p95_le_20ms': p95 is not None and p95 <= 0.020,
+        'frame_age_p95_le_200ms': age_p95 is not None and age_p95 <= 0.2,
+        'no_future_frames': bool(ages) and min(ages) >= -0.02,
         'depth_valid_median_ge_10pct': depth_fraction is not None and depth_fraction >= 0.1,
         'matching_ge_90pct': bool(maximum_received) and total / maximum_received >= 0.9,
         'all_streams_present': len(received) == 3,
@@ -73,13 +77,14 @@ def audit_summary(samples, errors, received, minimum_samples):
     }
     return {'passed': all(gates.values()), 'gates': gates, 'matched_samples': len(samples),
             'tf_valid_samples': len(valid), 'errors': dict(errors), 'sync_p95_s': p95,
+            'frame_age_p95_s': age_p95,
             'median_valid_depth_fraction': depth_fraction, 'sensor_health': received}
 
 
 class RgbdAudit(Node):
     """Bound synchronization and TF queues; never relabel stale input as current."""
 
-    def __init__(self, use_sim_time=False):
+    def __init__(self, use_sim_time=False, reliable=False):
         super().__init__('rgbd_audit', parameter_overrides=[
             Parameter('use_sim_time', value=use_sim_time)])
         self.bridge = CvBridge()
@@ -90,8 +95,9 @@ class RgbdAudit(Node):
         self.errors = Counter()
         self.pending = deque()
         self.camera_metadata = None
+        qos = QoSProfile(depth=5) if reliable else qos_profile_sensor_data
         self.inputs = [message_filters.Subscriber(self, typ, topic,
-                       qos_profile=qos_profile_sensor_data)
+                       qos_profile=qos)
                        for typ, topic in [(Image, '/rgbd/image'), (Image, '/rgbd/depth_image'),
                                           (CameraInfo, '/rgbd/camera_info')]]
         for subscriber, name in zip(self.inputs, ('rgb', 'depth', 'camera_info')):
@@ -114,6 +120,9 @@ class RgbdAudit(Node):
             array = self.bridge.imgmsg_to_cv2(depth, desired_encoding='passthrough')
             stats = depth_statistics(array, depth.encoding)
             stats['sync_delta_s'] = delta
+            stats['frame_age_s'] = (
+                self.get_clock().now().nanoseconds
+                - Time.from_msg(depth.header.stamp).nanoseconds) / 1e9
             self.camera_metadata = {'width': info.width, 'height': info.height,
                                     'k': list(info.k), 'd': list(info.d),
                                     'distortion_model': info.distortion_model,
@@ -151,6 +160,8 @@ def main(args=None):
     parser.add_argument('--seconds', type=float, default=120.0)
     parser.add_argument('--minimum-samples', type=int, default=300)
     parser.add_argument('--use-sim-time', action='store_true')
+    parser.add_argument('--reliable', action='store_true',
+                        help='Use only with RELIABLE sensor publishers; reduces large-frame loss')
     options = parser.parse_args(args)
     if not math.isfinite(options.seconds) or options.seconds <= 0 or options.minimum_samples <= 0:
         parser.error('seconds and minimum-samples must be positive')
@@ -159,7 +170,7 @@ def main(args=None):
     with output.open('x', encoding='utf-8') as stream:
         stream.write('{}\n')
     rclpy.init(args=[])
-    node = RgbdAudit(options.use_sim_time)
+    node = RgbdAudit(options.use_sim_time, options.reliable)
     start = time.monotonic()
     try:
         while rclpy.ok() and time.monotonic() - start < options.seconds:
@@ -168,7 +179,8 @@ def main(args=None):
         node.errors['pending_at_end'] += len(node.pending)
         report = audit_summary(node.samples, node.errors, node.health.report(time.monotonic()),
                                options.minimum_samples)
-        report.update(camera=node.camera_metadata, wall_duration_s=time.monotonic() - start,
+        report.update(camera=node.camera_metadata, reliable=options.reliable,
+                      wall_duration_s=time.monotonic() - start,
                       samples=node.samples)
         output.write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
         print(json.dumps({k: v for k, v in report.items() if k != 'samples'}), flush=True)

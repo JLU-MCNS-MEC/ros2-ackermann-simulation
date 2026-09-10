@@ -93,6 +93,17 @@ def test_progress_threshold_allows_safety_scaled_approach():
     assert config['bt_navigator']['ros__parameters']['default_server_timeout'] == 500
 
 
+def test_lidar_scan_pipeline_uses_intra_process_transport():
+    text = (ROOT / 'launch' / 'nav2_waypoint_nav.launch.py').read_text()
+    assert "'bridge_lidar_points': 'false'" in text
+    assert 'slam_scan, lidar_scan_projection' in text
+    assert text.count("'use_intra_process_comms': True") == 3
+    bridge = yaml.safe_load((ROOT / 'config' / 'lidar_bridge.yaml').read_text())
+    assert len(bridge) == 1
+    assert bridge[0]['topic_name'] == '/scan/points'
+    assert bridge[0]['direction'] == 'GZ_TO_ROS'
+
+
 def test_semantic_demo_loads_sensor_map_and_recorded_landmarks():
     context = LaunchContext()
     context.launch_configurations.update(

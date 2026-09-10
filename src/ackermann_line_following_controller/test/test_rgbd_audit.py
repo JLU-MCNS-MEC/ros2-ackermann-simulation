@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 from sensor_msgs.msg import CameraInfo, Image
+from rclpy.time import Time
 from tf2_ros import TransformException
 
 from ackermann_line_following_controller import rgbd_audit as module
@@ -69,7 +70,7 @@ def test_camera_rejects_unregistered_data(kind):
 
 def test_summary_requires_actual_data_and_all_gates():
     assert not module.audit_summary([], {}, {}, 1)['passed']
-    sample = {'tf_valid': True, 'sync_delta_s': 0.01, 'valid_fraction': 0.8}
+    sample = {'tf_valid': True, 'sync_delta_s': 0.01, 'valid_fraction': 0.8, 'frame_age_s': 0.01}
     health = {key: {'count': 1, 'nonmonotonic_stamps': 0, 'max_wall_gap_s': 0.1,
                     'last_receipt_age_s': 0.1} for key in ('rgb', 'depth', 'camera_info')}
     assert module.audit_summary([sample], {}, health, 1)['passed']
@@ -83,7 +84,9 @@ def test_summary_requires_actual_data_and_all_gates():
 
 def fake_audit():
     node = SimpleNamespace(bridge=MagicMock(), buffer=MagicMock(), health=MagicMock(),
+                           get_clock=MagicMock(),
                            samples=[], errors=Counter(), pending=deque(), camera_metadata=None)
+    node.get_clock.return_value.now.return_value = Time(seconds=1)
     node.bridge.imgmsg_to_cv2.side_effect = lambda msg, desired_encoding: (
         np.zeros((3, 4, 3), dtype=np.uint8) if desired_encoding == 'rgb8'
         else np.ones((3, 4), dtype=np.float32))
@@ -128,18 +131,22 @@ def test_tf_success_records_map_pose():
     assert node.samples[0]['map_position'] == [1., 2., 3.]
 
 
-def test_constructor_uses_bounded_sensor_synchronization(monkeypatch):
+@pytest.mark.parametrize('reliable', [False, True])
+def test_constructor_uses_bounded_sensor_synchronization(monkeypatch, reliable):
     monkeypatch.setattr(module.Node, '__init__', lambda *args, **kwargs: None)
     timer = MagicMock()
     monkeypatch.setattr(module.Node, 'create_timer', timer)
     monkeypatch.setattr(module, 'Buffer', MagicMock())
     monkeypatch.setattr(module, 'TransformListener', MagicMock())
-    monkeypatch.setattr(module.message_filters, 'Subscriber', MagicMock())
+    subscriber = MagicMock()
+    monkeypatch.setattr(module.message_filters, 'Subscriber', subscriber)
     sync = MagicMock()
     monkeypatch.setattr(module.message_filters, 'ApproximateTimeSynchronizer', sync)
-    node = module.RgbdAudit(True)
+    node = module.RgbdAudit(True, reliable)
     assert len(node.inputs) == 3
     assert sync.call_args.kwargs == {'queue_size': 15, 'slop': 0.02}
+    qos = subscriber.call_args.kwargs['qos_profile']
+    assert qos.reliability.name == ('RELIABLE' if reliable else 'BEST_EFFORT')
     timer.assert_called_once()
 
 
@@ -170,3 +177,11 @@ def test_cli_missing_data_fails_and_cleans_up(tmp_path, monkeypatch):
 def test_cli_rejects_invalid_duration():
     with pytest.raises(SystemExit):
         module.main(['--output', 'unused', '--seconds', 'nan'])
+
+
+@pytest.mark.parametrize('age', [-0.05, 0.5])
+def test_stale_or_future_frames_fail_even_with_perfect_pair_sync(age):
+    sample = {'tf_valid': True, 'sync_delta_s': 0., 'valid_fraction': 1., 'frame_age_s': age}
+    health = {key: {'count': 1, 'nonmonotonic_stamps': 0, 'max_wall_gap_s': 0.1,
+                    'last_receipt_age_s': 0.1} for key in ('rgb', 'depth', 'camera_info')}
+    assert not module.audit_summary([sample], {}, health, 1)['passed']

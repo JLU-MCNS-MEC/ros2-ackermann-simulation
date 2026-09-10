@@ -8,7 +8,8 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import EqualsSubstitution, IfElseSubstitution, LaunchConfiguration, NotEqualsSubstitution
-from launch_ros.actions import Node
+from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.descriptions import ComposableNode
 from nav2_common.launch import RewrittenYaml
 
 
@@ -79,6 +80,7 @@ def generate_launch_description() -> LaunchDescription:
             'enable_waypoint_nav': 'false',
             'enable_ackermann_adapter': 'false',
             'enable_rgbd': LaunchConfiguration('enable_rgbd'),
+            'bridge_lidar_points': 'false',
             'target_speed': target_speed,
             'ground_truth_tf_output': ground_truth_tf_output,
         }.items(),
@@ -169,9 +171,11 @@ def generate_launch_description() -> LaunchDescription:
                 bringup_share, 'config', 'slam_indoor.yaml'),
         }.items(),
     )
-    slam_scan = Node(
+    slam_scan = ComposableNode(
         package='pointcloud_to_laserscan',
-        executable='pointcloud_to_laserscan_node', name='slam_scan_projection',
+        plugin='pointcloud_to_laserscan::PointCloudToLaserScanNode',
+        name='slam_scan_projection',
+        extra_arguments=[{'use_intra_process_comms': True}],
         remappings=[('cloud_in', '/scan/points'), ('scan', '/scan_slam')],
         parameters=[{'use_sim_time': True, 'target_frame': 'lidar_link',
                      'transform_tolerance': 0.2, 'min_height': -0.10,
@@ -196,11 +200,11 @@ def generate_launch_description() -> LaunchDescription:
     # Gazebo's multi-layer GPU lidar publishes useful obstacle returns in the
     # PointCloud2 stream. Project a ground-filtered height band to LaserScan
     # for Nav2 plugins that require a two-dimensional scan.
-    lidar_scan_projection = Node(
+    lidar_scan_projection = ComposableNode(
         package='pointcloud_to_laserscan',
-        executable='pointcloud_to_laserscan_node',
+        plugin='pointcloud_to_laserscan::PointCloudToLaserScanNode',
         name='mid360_scan_projection',
-        output='screen',
+        extra_arguments=[{'use_intra_process_comms': True}],
         remappings=[
             ('cloud_in', '/scan/points'),
             ('scan', '/scan_nav'),
@@ -221,6 +225,23 @@ def generate_launch_description() -> LaunchDescription:
                 'use_inf': True,
             }
         ],
+    )
+    # Keep the large point cloud and both scan consumers inside one process.
+    # This bypasses lossy inter-process delivery before the safety scan exists.
+    lidar_pipeline = ComposableNodeContainer(
+        name='lidar_pipeline', namespace='',
+        package='rclcpp_components', executable='component_container_mt',
+        composable_node_descriptions=[
+            ComposableNode(
+                package='ros_gz_bridge', plugin='ros_gz_bridge::RosGzBridge',
+                name='pointcloud_bridge',
+                parameters=[{'use_sim_time': True, 'config_file': os.path.join(
+                    bringup_share, 'config', 'lidar_bridge.yaml')}],
+                extra_arguments=[{'use_intra_process_comms': True}],
+            ),
+            slam_scan, lidar_scan_projection,
+        ],
+        output='screen',
     )
     lidar_ground_filter = Node(
         package='pcl_ros',
@@ -436,10 +457,9 @@ def generate_launch_description() -> LaunchDescription:
             amcl,
             amcl_lifecycle,
             slam,
-            slam_scan,
+            lidar_pipeline,
             control_boundary,
             chassis_adapter,
-            lidar_scan_projection,
             lidar_ground_filter,
             navigation,
             route_sender,
