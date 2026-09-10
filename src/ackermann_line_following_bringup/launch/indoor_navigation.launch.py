@@ -39,6 +39,7 @@ def _launch(context):
                 'use_ekf_localization': 'true',
                 'send_waypoints': 'false',
                 'allow_reversing': 'true',
+                'target_speed': LaunchConfiguration('target_speed'),
                 'enable_rgbd': LaunchConfiguration('enable_rgbd'),
                 'use_rviz': LaunchConfiguration('use_rviz'),
             }.items(),
@@ -55,6 +56,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument('map_file', default_value=''),
             DeclareLaunchArgument('enable_rgbd', default_value='false'),
+            DeclareLaunchArgument('target_speed', default_value='0.35'),
             DeclareLaunchArgument('use_rviz', default_value='false'),
             OpaqueFunction(function=_launch),
         ]

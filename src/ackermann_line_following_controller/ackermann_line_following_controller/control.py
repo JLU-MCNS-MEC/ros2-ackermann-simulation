@@ -68,14 +68,13 @@ def twist_to_ackermann(
     wheelbase: float,
     max_speed: float,
     max_steering: float,
-    minimum_speed: float = 0.02,
+    minimum_speed: float = 1.0e-6,
 ) -> tuple[float, float]:
     """Convert a planar body twist into a bounded Ackermann command.
 
-    A car cannot realize angular velocity while stationary.  Commands below
-    ``minimum_speed`` therefore keep the requested longitudinal stop and use
-    zero steering instead of turning an ill-conditioned division into a full
-    lock command.
+    Preserve curvature even when safety monitoring scales motion below 0.02
+    m/s. Only numerically stationary commands are stopped; never synthesize
+    forward motion to realize an in-place rotation.
     """
     values = (
         speed,
@@ -97,8 +96,8 @@ def twist_to_ackermann(
         raise ValueError('minimum_speed must be non-negative')
 
     bounded_speed = clamp(speed, -max_speed, max_speed)
-    if abs(bounded_speed) < minimum_speed:
-        return bounded_speed, 0.0
+    if abs(bounded_speed) <= max(minimum_speed, 1.0e-9):
+        return 0.0, 0.0
     steering = math.atan(wheelbase * yaw_rate / bounded_speed)
     return bounded_speed, clamp(steering, -max_steering, max_steering)
 

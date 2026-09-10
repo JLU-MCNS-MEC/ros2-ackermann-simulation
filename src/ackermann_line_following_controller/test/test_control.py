@@ -63,6 +63,26 @@ def test_twist_conversion_clamps_and_rejects_stationary_rotation() -> None:
         twist_to_ackermann(0.2, 0.0, 0.0, 0.6, 0.55)
 
 
+@pytest.mark.parametrize('speed', [0.0175, -0.0175, 0.001, -0.001, 0.02])
+def test_safety_scaled_twist_preserves_low_speed_curvature(speed) -> None:
+    yaw_rate = ackermann_to_yaw_rate(speed, 0.4, 0.56)
+    actual_speed, steering = twist_to_ackermann(speed, yaw_rate, 0.56, 0.6, 0.55)
+    assert actual_speed == pytest.approx(speed)
+    assert steering == pytest.approx(0.4)
+
+
+@pytest.mark.parametrize('threshold', [0.0, 1.0e-6, 0.02])
+def test_stationary_twist_is_safe_even_with_zero_threshold(threshold) -> None:
+    assert twist_to_ackermann(0.0, 1.0, 0.56, 0.6, 0.55, threshold) == (0.0, 0.0)
+    assert twist_to_ackermann(threshold, 1.0, 0.56, 0.6, 0.55, threshold) == (0.0, 0.0)
+
+
+@pytest.mark.parametrize('threshold', [-0.01, float('nan'), float('inf')])
+def test_twist_rejects_invalid_stationary_threshold(threshold) -> None:
+    with pytest.raises(ValueError):
+        twist_to_ackermann(0.01, 0.1, 0.56, 0.6, 0.55, threshold)
+
+
 def test_command_limiter_limits_forward_acceleration_and_steering_rate() -> None:
     limiter = AckermannCommandLimiter(
         max_acceleration=1.0,

@@ -49,9 +49,9 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument('max_steering', default_value='0.55'),
             DeclareLaunchArgument(
                 'minimum_speed',
-                default_value='0.02',
+                default_value='0.000001',
                 description=(
-                    'Below this speed a yaw command cannot be realized.'
+                    'Numerical stationary threshold; preserve low-speed curvature.'
                 ),
             ),
             DeclareLaunchArgument(

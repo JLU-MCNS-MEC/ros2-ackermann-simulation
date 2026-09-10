@@ -35,6 +35,7 @@ def _launch(context):
                 'map_file': map_file,
                 'use_rviz': LaunchConfiguration('use_rviz'),
                 'enable_rgbd': LaunchConfiguration('enable_rgbd'),
+                'target_speed': LaunchConfiguration('target_speed'),
             }.items(),
         ),
         Node(
@@ -63,6 +64,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument('use_rviz', default_value='false'),
             DeclareLaunchArgument('enable_rgbd', default_value='false'),
+            DeclareLaunchArgument('target_speed', default_value='0.35'),
             OpaqueFunction(function=_launch),
         ]
     )

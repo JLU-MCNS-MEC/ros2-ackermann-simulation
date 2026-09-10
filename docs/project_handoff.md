@@ -13,6 +13,14 @@
 - 用户点击目标无反应的原因已定位：`nav2_rviz_plugins/GoalTool` 只通知 Nav2 面板，
   原配置缺少 `Navigation 2` 面板。已补齐正式与当前临时配置并增加配对检查测试；
   仅重启 RViz，仿真与 AMCL 保持运行。
+- 已修复低速转向死区；室内两级启动入口默认 `target_speed:=0.35`，可以显式回退。
+  当前仿真已动态更新速度，转换器独立重启并运行在新阈值 `1e-6 m/s`；主 launch
+  参数临时文件仍是旧值，后续完整重启将读取已更新的源配置。`/drive` 发布者只有一个。
+- 六个连续目标成功（含前进、倒车与转弯），五项隔离安全测试通过；安全区未缩小。
+  结果见 `docs/experiments/data/indoor_20260910/indoor_speed_safety.json`。
+  尚未完成 20 次可靠性、动态障碍、实测制动距离与实车验收。
+  两个受影响包构建通过，108 项测试通过；修复核心 `control.py` 测试覆盖率 86%。
+  详细验证见 [`experiments/indoor_speed_safety.md`](experiments/indoor_speed_safety.md)。
 
 ## 当前开发：100 平方米语义导航
 

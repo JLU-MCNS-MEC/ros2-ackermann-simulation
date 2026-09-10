@@ -22,7 +22,7 @@ class TwistToAckermannNode(Node):
         self.declare_parameter('wheelbase', 0.56)
         self.declare_parameter('max_speed', 0.6)
         self.declare_parameter('max_steering', 0.55)
-        self.declare_parameter('minimum_speed', 0.02)
+        self.declare_parameter('minimum_speed', 1.0e-6)
         self.declare_parameter('command_timeout', 0.25)
         self.declare_parameter('publish_rate', 50.0)
 
@@ -78,7 +78,8 @@ class TwistToAckermannNode(Node):
             return
 
         stationary_turn = (
-            abs(speed) < self.minimum_speed and abs(yaw_rate) > 1.0e-4
+            abs(speed) <= max(self.minimum_speed, 1.0e-9)
+            and abs(yaw_rate) > 1.0e-4
         )
         if stationary_turn and not self._reported_stationary_turn:
             self.get_logger().warning(

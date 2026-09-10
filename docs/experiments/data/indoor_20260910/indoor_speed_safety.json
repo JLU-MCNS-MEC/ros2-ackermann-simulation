@@ -1,0 +1,150 @@
+{
+  "date": "2026-09-10",
+  "nominal_speed_mps": 0.35,
+  "minimum_speed_mps": 1e-06,
+  "routes": [
+    {
+      "goal": "corridor",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 38.79,
+      "speed_range": [
+        -0.15000000596046448,
+        0.3499999940395355
+      ],
+      "reverse_samples": 78,
+      "low_speed_steering_samples": 5,
+      "safety_actions": {}
+    },
+    {
+      "goal": "entrance",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 31.17,
+      "speed_range": [
+        -0.15000000596046448,
+        0.3499999940395355
+      ],
+      "reverse_samples": 301,
+      "low_speed_steering_samples": 0,
+      "safety_actions": {}
+    },
+    {
+      "goal": "office",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 20.32,
+      "speed_range": [
+        -0.15000000596046448,
+        0.3499999940395355
+      ],
+      "reverse_samples": 9,
+      "low_speed_steering_samples": 2,
+      "safety_actions": {}
+    },
+    {
+      "goal": "clicked_repeat",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 28.93,
+      "speed_range": [
+        -0.15000000596046448,
+        0.3499999940395355
+      ],
+      "reverse_samples": 109,
+      "low_speed_steering_samples": 0,
+      "safety_actions": {
+        "[2, 'PolygonSlow']": 1,
+        "[0, '']": 264
+      }
+    },
+    {
+      "goal": "entrance_repeat",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 30.47,
+      "speed_range": [
+        -0.15000000596046448,
+        0.0
+      ],
+      "reverse_samples": 299,
+      "low_speed_steering_samples": 0,
+      "safety_actions": {}
+    },
+    {
+      "goal": "office_repeat",
+      "result": "TaskResult.SUCCEEDED",
+      "wall_seconds": 22.6,
+      "speed_range": [
+        -0.02500000037252903,
+        0.3499999940395355
+      ],
+      "reverse_samples": 2,
+      "low_speed_steering_samples": 0,
+      "safety_actions": {}
+    }
+  ],
+  "isolated_collision_monitor": [
+    {
+      "case": "clear",
+      "expected": 0.35,
+      "last_outputs": [
+        0.35,
+        0.35,
+        0.35,
+        0.35,
+        0.35
+      ],
+      "passed": true
+    },
+    {
+      "case": "slow",
+      "expected": 0.1225,
+      "last_outputs": [
+        0.12249999999999998,
+        0.12249999999999998,
+        0.12249999999999998,
+        0.12249999999999998,
+        0.12249999999999998
+      ],
+      "passed": true
+    },
+    {
+      "case": "stop",
+      "expected": 0.0,
+      "last_outputs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "passed": true
+    },
+    {
+      "case": "clear_again",
+      "expected": 0.35,
+      "last_outputs": [
+        0.35,
+        0.35,
+        0.35,
+        0.35,
+        0.35
+      ],
+      "passed": true
+    },
+    {
+      "case": "sensor_timeout",
+      "expected": 0.0,
+      "last_outputs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Six routes only; not a 20-run reliability acceptance",
+    "Collision monitor state is event-based; empty does not establish initial state",
+    "Synthetic safety tests use isolated topics and do not measure physical braking distance",
+    "Previous clicked goal orientation/start pose differ; not a controlled timing comparison"
+  ]
+}

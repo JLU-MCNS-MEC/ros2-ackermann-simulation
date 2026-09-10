@@ -28,6 +28,16 @@ def test_indoor_mapping_launch_requires_no_prior_map():
     assert indoor_module().generate_launch_description().entities
 
 
+@pytest.mark.parametrize('name', ['indoor_navigation', 'indoor_semantic'])
+def test_indoor_speed_default_and_forwarding(name):
+    module = indoor_module(name)
+    argument = next(entity for entity in module.generate_launch_description().entities
+                    if getattr(entity, 'name', None) == 'target_speed')
+    assert ''.join(part.perform(LaunchContext()) for part in argument.default_value) == '0.35'
+    text = (ROOT / 'launch' / f'{name}.launch.py').read_text()
+    assert "'target_speed': LaunchConfiguration('target_speed')" in text
+
+
 def test_indoor_localization_rejects_missing_map(tmp_path):
     context = LaunchContext()
     context.launch_configurations.update(

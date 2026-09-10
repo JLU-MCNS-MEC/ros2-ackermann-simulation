@@ -54,7 +54,8 @@ ros2 launch ackermann_line_following_bringup sim2real_control.launch.py \
 ```
 
 转换遵循 `steering = atan(wheelbase * yaw_rate / speed)`，支持前进和倒车，限制
-车速与转角。车速低于 `0.02 m/s` 时丢弃不可实现的原地旋转请求；输入超过
+车速与转角。2026-09-10 修正：仅在数值静止阈值 `1e-6 m/s` 内输出停车，
+非零低速仍保留曲率，避免安全减速后丢失转向；输入超过
 `0.25 s` 未更新时持续输出停车命令。真实驱动器还必须有独立、更底层的心跳和
 急停，不能只依赖 ROS 节点。
 
