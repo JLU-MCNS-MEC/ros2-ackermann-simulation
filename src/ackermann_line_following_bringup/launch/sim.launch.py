@@ -103,7 +103,7 @@ def generate_launch_description() -> LaunchDescription:
     command_bridge_topic = [
         '/model/',
         entity_name,
-        '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+        '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
     ]
     odometry_topic = [
         '/model/',

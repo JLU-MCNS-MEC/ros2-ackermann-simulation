@@ -7,7 +7,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import IfElseSubstitution, LaunchConfiguration
+from launch.substitutions import EqualsSubstitution, IfElseSubstitution, LaunchConfiguration, NotEqualsSubstitution
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
 
@@ -51,7 +51,10 @@ def generate_launch_description() -> LaunchDescription:
     start_y = LaunchConfiguration('start_y')
     start_z = LaunchConfiguration('start_z')
     rviz_config = LaunchConfiguration('rviz_config')
-    use_ekf_localization = LaunchConfiguration('use_ekf_localization')
+    use_ekf_localization = IfElseSubstitution(
+        EqualsSubstitution(LaunchConfiguration('localization_mode'), 'static'),
+        if_value=LaunchConfiguration('use_ekf_localization'), else_value='true',
+    )
     odom_topic = IfElseSubstitution(
         use_ekf_localization,
         if_value='/odometry/filtered',
@@ -75,7 +78,7 @@ def generate_launch_description() -> LaunchDescription:
             'enable_line_follower': 'false',
             'enable_waypoint_nav': 'false',
             'enable_ackermann_adapter': 'false',
-            'enable_rgbd': 'false',
+            'enable_rgbd': LaunchConfiguration('enable_rgbd'),
             'target_speed': target_speed,
             'ground_truth_tf_output': ground_truth_tf_output,
         }.items(),
@@ -85,6 +88,7 @@ def generate_launch_description() -> LaunchDescription:
     # so this simulation uses coincident map and odom frames. On hardware this
     # static transform is replaced by robot_localization + SLAM/AMCL.
     map_to_odom = Node(
+        condition=IfCondition(EqualsSubstitution(LaunchConfiguration('localization_mode'), 'static')),
         package='tf2_ros',
         executable='static_transform_publisher',
         name='map_to_odom',
@@ -115,6 +119,7 @@ def generate_launch_description() -> LaunchDescription:
         remappings=[('odometry/filtered', '/odometry/filtered')],
     )
     map_server = Node(
+        condition=IfCondition(NotEqualsSubstitution(LaunchConfiguration('localization_mode'), 'mapping')),
         package='nav2_map_server',
         executable='map_server',
         name='map_server',
@@ -127,6 +132,7 @@ def generate_launch_description() -> LaunchDescription:
         ],
     )
     map_lifecycle = Node(
+        condition=IfCondition(NotEqualsSubstitution(LaunchConfiguration('localization_mode'), 'mapping')),
         package='nav2_lifecycle_manager',
         executable='lifecycle_manager',
         name='lifecycle_manager_localization',
@@ -138,6 +144,53 @@ def generate_launch_description() -> LaunchDescription:
                 'node_names': ['map_server'],
             }
         ],
+    )
+
+    amcl = Node(
+        condition=IfCondition(EqualsSubstitution(LaunchConfiguration('localization_mode'), 'amcl')),
+        package='nav2_amcl', executable='amcl', name='amcl', output='screen',
+        parameters=[params, {'use_sim_time': True, 'scan_topic': '/scan_slam'}],
+    )
+    amcl_lifecycle = Node(
+        condition=IfCondition(EqualsSubstitution(LaunchConfiguration('localization_mode'), 'amcl')),
+        package='nav2_lifecycle_manager', executable='lifecycle_manager',
+        name='lifecycle_manager_amcl', output='screen',
+        parameters=[{'use_sim_time': True, 'autostart': True,
+                     'node_names': ['amcl']}],
+    )
+    slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(
+            get_package_share_directory('slam_toolbox'), 'launch',
+            'online_async_launch.py')),
+        condition=IfCondition(EqualsSubstitution(LaunchConfiguration('localization_mode'), 'mapping')),
+        launch_arguments={
+            'use_sim_time': 'true',
+            'slam_params_file': os.path.join(
+                bringup_share, 'config', 'slam_indoor.yaml'),
+        }.items(),
+    )
+    slam_scan = Node(
+        package='pointcloud_to_laserscan',
+        executable='pointcloud_to_laserscan_node', name='slam_scan_projection',
+        remappings=[('cloud_in', '/scan/points'), ('scan', '/scan_slam')],
+        parameters=[{'use_sim_time': True, 'target_frame': 'lidar_link',
+                     'transform_tolerance': 0.2, 'min_height': -0.10,
+                     'max_height': 0.50, 'angle_min': -3.141592653589793,
+                     'angle_max': 3.141592653589793,
+                     'angle_increment': 0.006135923151543, 'scan_time': 0.1,
+                     'range_min': 0.12, 'range_max': 12.0, 'use_inf': True}],
+    )
+    control_boundary = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(
+            bringup_share, 'launch', 'sim2real_control.launch.py')),
+        launch_arguments={'use_sim_time': 'true'}.items(),
+    )
+    chassis_adapter = Node(
+        package='ackermann_line_following_controller',
+        executable='ackermann_to_twist', name='navigation_chassis_adapter',
+        parameters=[{'use_sim_time': True, 'input_topic': '/drive',
+                     'output_topic': ['/model/', entity_name, '/cmd_vel'],
+                     'command_timeout': 0.25}],
     )
 
     # Gazebo's multi-layer GPU lidar publishes useful obstacle returns in the
@@ -216,6 +269,7 @@ def generate_launch_description() -> LaunchDescription:
                     ): target_speed,
                     'bt_navigator.ros__parameters.odom_topic': odom_topic,
                     'velocity_smoother.ros__parameters.odom_topic': odom_topic,
+                    'collision_monitor.ros__parameters.cmd_vel_out_topic': '/cmd_vel_safe',
                 },
                 root_key='',
                 convert_types=True,
@@ -284,6 +338,12 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                'localization_mode', default_value='static',
+                choices=['static', 'mapping', 'amcl'],
+                description='Static legacy baseline, online SLAM or saved-map AMCL.',
+            ),
+            DeclareLaunchArgument('enable_rgbd', default_value='false'),
             DeclareLaunchArgument(
                 'world_name',
                 default_value='waypoint_obstacle',
@@ -368,6 +428,12 @@ def generate_launch_description() -> LaunchDescription:
             map_to_odom,
             map_server,
             map_lifecycle,
+            amcl,
+            amcl_lifecycle,
+            slam,
+            slam_scan,
+            control_boundary,
+            chassis_adapter,
             lidar_scan_projection,
             lidar_ground_filter,
             navigation,

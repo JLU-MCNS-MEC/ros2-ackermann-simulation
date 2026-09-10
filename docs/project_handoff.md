@@ -1,6 +1,20 @@
 # 工程状态与会话交接
 
-更新时间：2026-09-08。
+更新时间：2026-09-10。
+
+## 当前开发：100 平方米语义导航
+
+- 功能分支：`feature/semantic-navigation-100sqm`；完整清单见
+  [`navigation_semantic_todo.md`](navigation_semantic_todo.md)。
+- 新增 `indoor_navigation.launch.py`：10 × 10 m 场景、EKF、Slam Toolbox、独立
+  `/scan_slam` 和 Nav2；真值只发 `/tf_ground_truth`，无静态 `map -> odom`。
+- 导航控制已贯通 `/cmd_vel_safe -> /drive -> Gazebo`，Gazebo 命令桥改为单向。
+- 构建 3 包通过，第一阶段 50 项测试通过；在线 SLAM 首两个导航目标实际成功，
+  23.42 s 和 15.35 s。完整巡回、保存重启、闭环精度和语义导航仍待验收。
+- 初次在线导航因 SLAM TF 时间滞后失败；启用 `restamp_tf` 后上述两目标通过。
+- 命名地标计划明确标记人工观测来源，不能描述为自动视觉识别或三维语义建图。
+
+下文为此前静态导航基线，运行状态应以最新实验记录为准。
 
 本文是后续会话的首要上下文。详细 Sim2Real 方案见
 [`sim2real_plan.md`](sim2real_plan.md)，静态导航数据见
