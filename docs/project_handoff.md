@@ -12,6 +12,9 @@
 - 构建 3 包通过，第一阶段 50 项测试通过；在线 SLAM 首两个导航目标实际成功，
   23.42 s 和 15.35 s。完整巡回、保存重启、闭环精度和语义导航仍待验收。
 - 初次在线导航因 SLAM TF 时间滞后失败；启用 `restamp_tf` 后上述两目标通过。
+- 后续 6 个倒车模式目标连续成功并保存地图与 pose graph；重启 AMCL 后 2 个目标
+  成功（19.52 s、28.96 s）。RGB-D 10 组同步与采集时刻 TF 检查通过。
+  详情见 [`experiments/indoor_navigation_baseline.md`](experiments/indoor_navigation_baseline.md)。
 - 命名地标计划明确标记人工观测来源，不能描述为自动视觉识别或三维语义建图。
 
 下文为此前静态导航基线，运行状态应以最新实验记录为准。

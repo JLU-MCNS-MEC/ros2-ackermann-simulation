@@ -28,6 +28,7 @@ def _launch(context):
             'gz_args': ['-r -s --headless-rendering ', world],
             'start_x': '-3.5', 'start_y': '-3.5',
             'use_ekf_localization': 'true', 'send_waypoints': 'false',
+            'allow_reversing': 'true',
             'enable_rgbd': LaunchConfiguration('enable_rgbd'),
             'use_rviz': LaunchConfiguration('use_rviz'),
         }.items(),

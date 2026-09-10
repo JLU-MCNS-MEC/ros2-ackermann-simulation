@@ -270,6 +270,10 @@ def generate_launch_description() -> LaunchDescription:
                     'bt_navigator.ros__parameters.odom_topic': odom_topic,
                     'velocity_smoother.ros__parameters.odom_topic': odom_topic,
                     'collision_monitor.ros__parameters.cmd_vel_out_topic': '/cmd_vel_safe',
+                    'planner_server.ros__parameters.GridBased.motion_model_for_search': IfElseSubstitution(
+                        LaunchConfiguration('allow_reversing'),
+                        if_value='REEDS_SHEPP', else_value='DUBIN'),
+                    'controller_server.ros__parameters.FollowPath.allow_reversing': LaunchConfiguration('allow_reversing'),
                 },
                 root_key='',
                 convert_types=True,
@@ -344,6 +348,7 @@ def generate_launch_description() -> LaunchDescription:
                 description='Static legacy baseline, online SLAM or saved-map AMCL.',
             ),
             DeclareLaunchArgument('enable_rgbd', default_value='false'),
+            DeclareLaunchArgument('allow_reversing', default_value='false'),
             DeclareLaunchArgument(
                 'world_name',
                 default_value='waypoint_obstacle',

@@ -1,0 +1,216 @@
+{
+  "passed": true,
+  "samples": [
+    {
+      "stamp_ns": 74514000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.9672532219086025,
+        1.9847375892079857,
+        0.41000000000000003
+      ]
+    },
+    {
+      "stamp_ns": 74646000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.966378604418526,
+        2.0007028567099105,
+        0.4099999999999999
+      ]
+    },
+    {
+      "stamp_ns": 74712000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.965993389809911,
+        2.00684390635467,
+        0.41000000000000003
+      ]
+    },
+    {
+      "stamp_ns": 74844000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.9657982020287608,
+        2.0108329066920314,
+        0.40999999999999986
+      ]
+    },
+    {
+      "stamp_ns": 75306000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.9675219484003015,
+        2.0587421500307506,
+        0.41000000000000025
+      ]
+    },
+    {
+      "stamp_ns": 75636000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.9693815280335367,
+        2.089192798215963,
+        0.41000000000000014
+      ]
+    },
+    {
+      "stamp_ns": 75900000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.969773909303845,
+        2.094166828728709,
+        0.41000000000000014
+      ]
+    },
+    {
+      "stamp_ns": 76428000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.9492674131224343,
+        2.0991512833093724,
+        0.41000000000000014
+      ]
+    },
+    {
+      "stamp_ns": 76956000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.949181036904727,
+        2.0991295529151306,
+        0.41000000000000003
+      ]
+    },
+    {
+      "stamp_ns": 77022000000,
+      "spread_ms": 0.0,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "depth_size": [
+        640,
+        480
+      ],
+      "rgb_encoding": "rgb8",
+      "depth_encoding": "32FC1",
+      "fx": 462.2663372707335,
+      "fy": 462.26633727073346,
+      "map_camera_position": [
+        3.949170117539882,
+        2.0991276950739723,
+        0.41000000000000014
+      ]
+    }
+  ],
+  "limitation": "Checks timing, dimensions and TF only; no semantic detection or depth accuracy claim."
+}

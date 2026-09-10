@@ -1,0 +1,42 @@
+[
+  {
+    "goal": [
+      5,
+      0,
+      0
+    ],
+    "succeeded": true,
+    "timeout": false,
+    "seconds": 23.419988790992647
+  },
+  {
+    "goal": [
+      7,
+      2,
+      1.5708
+    ],
+    "succeeded": true,
+    "timeout": false,
+    "seconds": 15.35437749500852
+  },
+  {
+    "goal": [
+      7,
+      6,
+      1.5708
+    ],
+    "succeeded": true,
+    "timeout": false,
+    "seconds": 45.45984066298115
+  },
+  {
+    "goal": [
+      5,
+      7,
+      3.14159
+    ],
+    "succeeded": false,
+    "timeout": false,
+    "seconds": 10.853651625016937
+  }
+]
