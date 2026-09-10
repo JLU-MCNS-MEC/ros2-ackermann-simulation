@@ -9,13 +9,22 @@
 - 新增 `indoor_navigation.launch.py`：10 × 10 m 场景、EKF、Slam Toolbox、独立
   `/scan_slam` 和 Nav2；真值只发 `/tf_ground_truth`，无静态 `map -> odom`。
 - 导航控制已贯通 `/cmd_vel_safe -> /drive -> Gazebo`，Gazebo 命令桥改为单向。
-- 构建 3 包通过，第一阶段 50 项测试通过；在线 SLAM 首两个导航目标实际成功，
-  23.42 s 和 15.35 s。完整巡回、保存重启、闭环精度和语义导航仍待验收。
+- 构建 3 包通过；在线 SLAM 首两个导航目标实际成功，23.42 s 和 15.35 s。
+  三圈闭环精度、20 次重复导航与自主探索仍待验收。
 - 初次在线导航因 SLAM TF 时间滞后失败；启用 `restamp_tf` 后上述两目标通过。
 - 后续 6 个倒车模式目标连续成功并保存地图与 pose graph；重启 AMCL 后 2 个目标
   成功（19.52 s、28.96 s）。RGB-D 10 组同步与采集时刻 TF 检查通过。
   详情见 [`experiments/indoor_navigation_baseline.md`](experiments/indoor_navigation_baseline.md)。
-- 命名地标计划明确标记人工观测来源，不能描述为自动视觉识别或三维语义建图。
+- 命名地标已记录入口、中央通道、办公桌旁，明确标记 `manual_pose` 来源；
+  三个别名目标实际连续成功，49.52 s、43.12 s、30.71 s。未知、歧义、不可达与取消
+  路径已运行验证；不能描述为自动视觉识别或三维语义建图。
+- 一体启动：`ros2 launch ackermann_line_following_bringup indoor_semantic.launch.py`；
+  用户仍需通过 `/initialpose` 或 RViz 给 AMCL 粗略初始位姿。
+- 使用说明见 [`indoor_semantic_navigation.md`](indoor_semantic_navigation.md)。
+  语义模块 35 项测试，覆盖率 95.15%；最终全量 88 项测试通过，0 errors、0 failures、
+  0 skipped，3 包构建通过。
+- 一体启动入口运行验证：提供初始位姿后 Nav2 激活，语义服务报告三个地标 ready。
+  本轮仿真与导航测试进程已退出；RViz 桌面交互尚未实际验收。
 
 下文为此前静态导航基线，运行状态应以最新实验记录为准。
 

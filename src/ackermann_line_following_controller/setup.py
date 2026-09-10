@@ -21,6 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'semantic_navigation = ackermann_line_following_controller.semantic_navigation_node:main',
             'line_follower = ackermann_line_following_controller.line_follower_node:main',
             'ackermann_to_twist = ackermann_line_following_controller.ackermann_to_twist_node:main',
             'twist_to_ackermann = ackermann_line_following_controller.twist_to_ackermann_node:main',

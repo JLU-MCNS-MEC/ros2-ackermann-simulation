@@ -1,5 +1,9 @@
 # Ackermann 小车循迹仿真
 
+百平方米在线建图、AMCL 定位与命名语义目标导航见
+[室内语义导航使用说明](docs/indoor_semantic_navigation.md)，开发验收状态见
+[任务清单](docs/navigation_semantic_todo.md)。
+
 新增雷达、前向 RGB-D 与静态测距场景，详见 [感知测试与导航路线](docs/perception_navigation.md)。
 
 轨迹点跟踪和激光避障实例见 [Nav2 轨迹点与避障说明](docs/waypoint_obstacle_avoidance.md)。

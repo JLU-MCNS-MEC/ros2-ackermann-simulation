@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "map_id": "9cf95c391e0d4fd4b0b364cf669e776280e0a4ae06460a95cd197053959fd572",
+  "frame_id": "map",
+  "landmarks": [
+    {
+      "name": "入口",
+      "aliases": [
+        "起点"
+      ],
+      "source": "manual_pose",
+      "approach_pose": [
+        0.1755445772415688,
+        0.18598782685101362,
+        0.017933050236683887
+      ],
+      "observed_at": 29
+    },
+    {
+      "name": "中央通道",
+      "aliases": [
+        "通道"
+      ],
+      "source": "manual_pose",
+      "approach_pose": [
+        4.006387733741877,
+        1.7437065338757034,
+        1.730514414521991
+      ],
+      "observed_at": 85
+    },
+    {
+      "name": "办公桌旁",
+      "aliases": [
+        "办公区"
+      ],
+      "source": "manual_pose",
+      "approach_pose": [
+        -0.3689591723844907,
+        5.1210505504472374,
+        1.814142868783206
+      ],
+      "observed_at": 150
+    }
+  ]
+}

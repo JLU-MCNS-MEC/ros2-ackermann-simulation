@@ -1,0 +1,68 @@
+[
+  {
+    "query": "通道",
+    "seconds": 49.519299072009744,
+    "terminal": {
+      "state": "succeeded",
+      "detail": "中央通道"
+    },
+    "events": [
+      {
+        "state": "planning",
+        "detail": "中央通道"
+      },
+      {
+        "state": "navigating",
+        "detail": "中央通道"
+      },
+      {
+        "state": "succeeded",
+        "detail": "中央通道"
+      }
+    ]
+  },
+  {
+    "query": "起点",
+    "seconds": 43.116021460009506,
+    "terminal": {
+      "state": "succeeded",
+      "detail": "入口"
+    },
+    "events": [
+      {
+        "state": "planning",
+        "detail": "入口"
+      },
+      {
+        "state": "navigating",
+        "detail": "入口"
+      },
+      {
+        "state": "succeeded",
+        "detail": "入口"
+      }
+    ]
+  },
+  {
+    "query": "办公区",
+    "seconds": 30.70503369299695,
+    "terminal": {
+      "state": "succeeded",
+      "detail": "办公桌旁"
+    },
+    "events": [
+      {
+        "state": "planning",
+        "detail": "办公桌旁"
+      },
+      {
+        "state": "navigating",
+        "detail": "办公桌旁"
+      },
+      {
+        "state": "succeeded",
+        "detail": "办公桌旁"
+      }
+    ]
+  }
+]

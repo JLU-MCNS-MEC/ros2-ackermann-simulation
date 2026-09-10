@@ -22,10 +22,15 @@ def main():
     parser.add_argument('--timeout', type=float, default=180)
     args = parser.parse_args()
     goals = json.loads(args.goals)
-    if not isinstance(goals, list) or not goals or any(
-        not isinstance(p, list) or len(p) != 3 or any(
-            not isinstance(v, (float, int)) or not math.isfinite(v) for v in p
-        ) for p in goals
+    if (
+        not isinstance(goals, list)
+        or not goals
+        or any(
+            not isinstance(p, list)
+            or len(p) != 3
+            or any(not isinstance(v, (float, int)) or not math.isfinite(v) for v in p)
+            for p in goals
+        )
     ):
         parser.error('goals must be a nonempty list of finite [x, y, yaw]')
     rclpy.init()
@@ -50,9 +55,19 @@ def main():
                     navigator.cancelTask()
                     timed_out = True
                     break
-            succeeded = accepted and not timed_out and navigator.getResult() == TaskResult.SUCCEEDED
-            results.append({'goal': [x, y, yaw], 'succeeded': succeeded,
-                            'timeout': timed_out, 'seconds': time.monotonic() - started})
+            succeeded = (
+                accepted
+                and not timed_out
+                and navigator.getResult() == TaskResult.SUCCEEDED
+            )
+            results.append(
+                {
+                    'goal': [x, y, yaw],
+                    'succeeded': succeeded,
+                    'timeout': timed_out,
+                    'seconds': time.monotonic() - started,
+                }
+            )
             print(json.dumps(results[-1]), flush=True)
             if not succeeded:
                 break

@@ -1,0 +1,52 @@
+[
+  {
+    "query": "不存在",
+    "seconds": 0.0011410900042392313,
+    "terminal": {
+      "state": "rejected",
+      "detail": "Unknown goal: 不存在"
+    },
+    "events": [
+      {
+        "state": "rejected",
+        "detail": "Unknown goal: 不存在"
+      }
+    ]
+  },
+  {
+    "query": "办公区",
+    "seconds": 0.000307217997033149,
+    "terminal": {
+      "state": "rejected",
+      "detail": "Ambiguous goal; use one of: 办公桌旁, 歧义测试"
+    },
+    "events": [
+      {
+        "state": "rejected",
+        "detail": "Ambiguous goal; use one of: 办公桌旁, 歧义测试"
+      }
+    ]
+  },
+  {
+    "query": "不可达测试",
+    "seconds": 0.05006448400672525,
+    "terminal": {
+      "state": "failed",
+      "detail": "不可达测试"
+    },
+    "events": [
+      {
+        "state": "planning",
+        "detail": "不可达测试"
+      },
+      {
+        "state": "navigating",
+        "detail": "不可达测试"
+      },
+      {
+        "state": "failed",
+        "detail": "不可达测试"
+      }
+    ]
+  }
+]

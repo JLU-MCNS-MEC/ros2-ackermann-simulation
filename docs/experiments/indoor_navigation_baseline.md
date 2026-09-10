@@ -29,5 +29,22 @@ Gazebo 运行；地图由雷达扫描生成，定位不使用 Gazebo 真值。
 ## 语义目标
 
 命名停靠位姿来自 AMCL 定位后的人工标注，明确保存 `source: manual_pose`。
-实际命名目标的导航结果另行记录；自动 RGB-D 检测、语义实例融合与三维语义地图
-仍未完成。
+别名“通道”“起点”“办公区”依次解析为中央通道、入口、办公桌旁，连续导航成功，
+耗时分别为 49.52 s、43.12 s 和 30.71 s。原始状态序列见
+[`indoor_semantic_result.json`](data/indoor_20260910/indoor_semantic_result.json)。
+
+边界测试使用独立临时测试数据库，加入重复别名和地图外 (100,100) 目标，未污染
+演示地标。未知和歧义查询返回 rejected，地图外目标返回 failed；另一次导航在
+执行中返回 canceled。边界检查脚本以非成功终态返回退出码 1，这是预期结果。
+真值 `/tf_ground_truth` 的订阅者数量为 0；正式 TF 发布者为 robot_state_publisher、
+EKF 和 AMCL。
+
+自动 RGB-D 检测、语义实例融合与三维语义地图仍未完成；命名停靠位姿也不等于
+完整物体几何地图。当前结果不代表任意自然语言理解或动态环境普遍可用。
+
+## 构建与测试
+
+3 个包构建成功；`colcon test-result --verbose`：88 tests，0 errors，0 failures，
+0 skipped。语义数据与命令处理模块共 35 项测试，合计覆盖率 95.15%。
+一体化 `indoor_semantic.launch.py` 已启动并加载演示地标；RViz 配置结构通过测试，
+本轮未进行桌面交互式 RViz 验收。

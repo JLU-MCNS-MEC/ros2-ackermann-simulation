@@ -1,0 +1,12 @@
+[
+  {
+    "goal": [
+      -0.4,
+      5,
+      1.5708
+    ],
+    "succeeded": true,
+    "timeout": false,
+    "seconds": 31.865355583984638
+  }
+]

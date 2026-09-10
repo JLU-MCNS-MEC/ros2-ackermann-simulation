@@ -1,0 +1,24 @@
+[
+  {
+    "query": "起点",
+    "seconds": 11.831212885008426,
+    "terminal": {
+      "state": "canceled",
+      "detail": "入口"
+    },
+    "events": [
+      {
+        "state": "planning",
+        "detail": "入口"
+      },
+      {
+        "state": "navigating",
+        "detail": "入口"
+      },
+      {
+        "state": "canceled",
+        "detail": "入口"
+      }
+    ]
+  }
+]
