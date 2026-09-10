@@ -47,7 +47,9 @@ bt_navigator:
     robot_base_frame: base_footprint
     odom_topic: /model/ackermann_car/odometry
     bt_loop_duration: 10
-    default_server_timeout: 20
+    # Milliseconds for action acknowledgement, not total navigation duration.
+    # Allow scheduling jitter when recording point clouds alongside Gazebo.
+    default_server_timeout: 500
     wait_for_service_timeout: 1000
     action_server_result_timeout: 900.0
     navigators: ["navigate_to_pose", "navigate_through_poses"]
@@ -87,8 +89,10 @@ controller_server:
     # Progress checker parameters
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.5
-      movement_time_allowance: 10.0
+      # Safety-scaled approach speed is 0.05 * 0.35 = 0.0175 m/s.
+      # Do not misclassify that legitimate motion as stalled (0.2 m / 15 s).
+      required_movement_radius: 0.2
+      movement_time_allowance: 15.0
     # Goal checker parameters
     #precise_goal_checker:
     #  plugin: "nav2_controller::SimpleGoalChecker"

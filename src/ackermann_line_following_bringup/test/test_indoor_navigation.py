@@ -81,6 +81,18 @@ def test_slam_uses_separate_scan_and_control_boundary():
     assert "cmd_vel_out_topic': '/cmd_vel_safe'" in text
 
 
+def test_progress_threshold_allows_safety_scaled_approach():
+    config = yaml.safe_load((ROOT / 'config' / 'nav2_ackermann_params.yaml').read_text())
+    controller = config['controller_server']['ros__parameters']
+    safety = config['collision_monitor']['ros__parameters']
+    progress = controller['progress_checker']
+    speed = (controller['FollowPath']['min_approach_linear_velocity']
+             * safety['PolygonSlow']['slowdown_ratio'])
+    assert 0 < progress['required_movement_radius'] < speed * progress['movement_time_allowance']
+    assert progress['movement_time_allowance'] <= 15.0
+    assert config['bt_navigator']['ros__parameters']['default_server_timeout'] == 500
+
+
 def test_semantic_demo_loads_sensor_map_and_recorded_landmarks():
     context = LaunchContext()
     context.launch_configurations.update(
