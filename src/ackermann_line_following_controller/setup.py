@@ -22,6 +22,18 @@ setup(
     entry_points={
         'console_scripts': [
             'rgbd_audit = ackermann_line_following_controller.rgbd_audit:main',
+            (
+                'visual_dataset_recorder = '
+                'ackermann_line_following_controller.visual_dataset_recorder:main'
+            ),
+            (
+                'visual_policy_train = '
+                'ackermann_line_following_controller.visual_policy_train:main'
+            ),
+            (
+                'visual_policy = '
+                'ackermann_line_following_controller.visual_policy_node:main'
+            ),
             'navigation_regression = ackermann_line_following_controller.navigation_regression:main',
             'semantic_navigation = ackermann_line_following_controller.semantic_navigation_node:main',
             'line_follower = ackermann_line_following_controller.line_follower_node:main',

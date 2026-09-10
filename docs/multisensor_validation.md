@@ -79,6 +79,35 @@ ros2 run ackermann_line_following_controller rgbd_audit \
 保存失败结果，不能通过放宽阈值静默变成成功。真实标定、长时稳定性和退化注入
 还需在对应 TODO 中单独确认。
 
+## V0：端到端视觉导航原型
+
+启动 RGB-D、完成 AMCL 初始定位后，在另一个终端记录 Nav2 示范：
+
+```bash
+ros2 launch ackermann_line_following_bringup visual_navigation.launch.py \
+  mode:=record dataset:=/tmp/visual_dataset_unique rate:=5.0
+
+ros2 run ackermann_line_following_controller navigation_regression \
+  --route src/ackermann_line_following_controller/config/indoor_regression.json \
+  --output /tmp/visual_teacher_unique.json --count 5 --timeout 150 --use-sim-time
+```
+
+默认老师是唯一发布的 `/cmd_vel_smoothed`。不要改用有多个发布者的 `/cmd_vel_nav`。
+正常按 Ctrl+C 结束记录后，训练只用于验证接口的小型模型：
+
+```bash
+ros2 run ackermann_line_following_controller visual_policy_train \
+  --dataset /tmp/visual_dataset_unique --model /tmp/visual_policy.yml
+
+ros2 launch ackermann_line_following_bringup visual_navigation.launch.py \
+  mode:=shadow model:=/tmp/visual_policy.yml \
+  metrics:=/tmp/visual_shadow_metrics.json rate:=5.0
+```
+
+影子输出是 `/visual_navigation/cmd_vel_shadow`，不接底盘。调试图像为
+`/visual_navigation/debug_image`；有路径时显示视觉预测与 Nav2 老师，无路径时仍刷新并
+显示等待状态。当前小型 MLP 只验证数据和运行链路，不能作为 V3/V4 控制验收。
+
 ## 数据保存
 
 提交小型摘要与配置版本到 `docs/experiments/data/`。大体积 bag 和完整图像采样留在

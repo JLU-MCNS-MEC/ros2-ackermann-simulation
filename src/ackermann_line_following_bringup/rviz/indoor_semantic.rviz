@@ -160,6 +160,14 @@ Visualization Manager:
       Topic: /rgbd/depth_image
       Transport Hint: raw
       Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: false
+      Name: Visual Policy Debug
+      Normalize Range: false
+      Queue Size: 2
+      Topic: /visual_navigation/debug_image
+      Transport Hint: raw
+      Value: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Name: TF

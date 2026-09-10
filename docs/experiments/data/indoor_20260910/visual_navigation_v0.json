@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-10",
+  "mode": "shadow_only",
+  "control_authority": false,
+  "teacher_topic": "/cmd_vel_smoothed",
+  "training_samples": 697,
+  "teacher_navigation": {
+    "requested": 5,
+    "successes": 5,
+    "recoveries": 0
+  },
+  "offline_validation": {
+    "samples": 139,
+    "linear_mae_mps": 0.039728,
+    "angular_mae_radps": 0.093418
+  },
+  "shadow_navigation": {
+    "requested": 3,
+    "successes": 3,
+    "recoveries": 0,
+    "comparison_samples": 272,
+    "linear_mae_mps": 0.118987,
+    "angular_mae_radps": 0.138559,
+    "linear_p95_mps": 0.509975,
+    "angular_p95_radps": 0.386900
+  },
+  "passed_for_control": false,
+  "dataset_manifest_sha256": "19cf80b1d7a865085c4b87fe7e174f463358268687c66fbcdf4dc9eb9065dfff",
+  "model_sha256": "265e5bc3a0d90369e6cd78cd8a709fcb6843d8daec5d0bb71fba2d53a0647350"
+}

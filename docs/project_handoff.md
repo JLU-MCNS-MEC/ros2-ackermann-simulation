@@ -4,8 +4,17 @@
 
 ## 当前可视化会话与最新验收
 
+- 已新增目标条件端到端视觉导航 V0：Nav2 示范采集、OpenCV MLP 训练、影子推理、
+  误差统计和实时图像叠加。它直接使用 RGB 与相对目标，不使用视觉点云生成控制。
+- 第二批使用唯一老师 `/cmd_vel_smoothed`，5 个目标成功、0 恢复，采集 697 组；
+  3 个影子目标全部由 Nav2 完成。离线 MAE 约 0.040 m/s、0.093 rad/s，但实时影子
+  MAE 约 0.119 m/s、0.139 rad/s，未达到控制接管门槛，视觉没有底盘控制权。
+- 当前 `visual_policy` 与 `rqt_image_view` 继续运行。调试图无路径时也持续刷新；用户
+  可重新发送目标查看 `VISION/NAV2` 对比。原始数据和模型位于
+  `artifacts/validation/20260910/visual_e2e/`，详情见
+  [V0 实验记录](experiments/visual_navigation_v0.md)。
 - 仿真、Gazebo GUI 和独立 RViz 继续运行；RGB-D 已开启，AMCL 已初始化。
-  5 目标测试结束后车辆停在入口附近，没有继续自动发送目标。
+  自动回归已结束，测试工具不会继续发送目标；用户可在 RViz 中手动设置新目标。
 - 当前主日志：`artifacts/validation/20260910/m1_fixed/launch.log`；
   RViz 使用 `/tmp/indoor_visual_20260910.rviz`，含已修复的 Navigation 2 面板。
 - 控制参数：室内巡航 0.35 m/s，数值静止阈值 1e-6 m/s；进展检查 0.2 m / 15 s，

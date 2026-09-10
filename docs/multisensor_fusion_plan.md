@@ -69,6 +69,17 @@ TF 发布权始终唯一：局部估计器发布 `odom -> base_footprint`；全�
 应是物体旁的可停靠位置，不是物体中心；接近后再观测确认，目标移动则重规划。
 大模型不得直接输出底盘命令，未知或歧义目标不得随意选一个执行。
 
+### D. 端到端视觉导航：图像如何直接生成动作
+
+目标接口为 `当前/历史 RGB 图像 + 相对目标或目标图像 -> 线速度与角速度`。第一阶段用
+Nav2 产生安全示范，并让视觉模型在影子模式同步预测；模型输出只进入独立话题，不控制
+车辆。影子验收通过后，优先把视觉策略封装为 Nav2 控制器插件，保留动作生命周期、
+速度平滑、Collision Monitor、`/cmd_vel_safe` 和底盘超时停车。
+
+训练集必须按完整路线切分，避免相邻视频帧同时进入训练和测试造成虚高。模型需要历史
+图像或显式运动状态，覆盖倒车、转向选择和短时遮挡。激光雷达不作为模型必需输入，
+但继续作为独立安全源；相机断流、推理超时或模型输出非有限值时必须停车。
+
 ## 3. 开源候选与取舍
 
 以下为官方仓库/文档核查，不等于已在本工程编译或验收。接入时固定提交或发行版，
@@ -84,15 +95,17 @@ TF 发布权始终唯一：局部估计器发布 `odom -> base_footprint`；全�
 | [Grounded-SAM-2](https://github.com/IDEA-Research/Grounded-SAM-2) | 开放词汇检测、分割和跟踪 | 用于离线标注/低频语义原型；实时第一版先测轻量模型；逐个核查权重及依赖许可 |
 | [ConceptGraphs](https://github.com/concept-graphs/concept-graphs) | 多视角物体融合、开放词汇三维场景图 | 借鉴物体关联和查询表示；研究管线不是完整 Nav2 导航系统 |
 | [Hydra](https://github.com/MIT-SPARK/Hydra) | 实时分层三维场景图、物体/地点/房间关系 | 中后期关系语义地图候选；官方说明已切 ROS 2，并在 Ubuntu 24.04/Jazzy 测试；复杂度高于第一版需求 |
+| [ViNT / NoMaD](https://github.com/robodhruv/visualnav-transformer) | 目标条件通用视觉导航、时间上下文和扩散动作生成 | 作为 V2 主候选；先复用数据表示和推理接口，再核查权重许可、ROS 2 封装与 8 GB 显存占用 |
+| [LeLaN](https://github.com/robodhruv/LeLaN) | 语言条件视觉导航 | 作为 V5 候选；必须增加未知/歧义拒绝，语言模型不得绕过安全控制链 |
 
 传感器接入参考：[Livox 官方驱动](https://github.com/Livox-SDK/livox_ros_driver2)
 支持 MID-360 与 ROS 2；具体 Jazzy 构建仍需验证。
 外参标定参考：[direct_visual_lidar_calibration](https://github.com/koide3/direct_visual_lidar_calibration)
 提供 LiDAR–camera 标定工具和 ROS 1/ROS 2 接口；标定结果必须以独立数据验证。
 
-近期推荐组合是 **现有 Nav2 + EKF/二维定位 + RGB-D 障碍源 + 轻量物体检测融合**；
-RTAB-Map 为第一条三维验证路线。FAST-LIVO2、Nvblox、Hydra 是按需求择一评估的
-升级方向，不要求同时安装和运行所有候选。
+近期推荐组合改为 **Nav2 老师 + 目标条件视觉策略影子运行 + 激光独立安全层**；
+RGB-D 几何障碍和物体检测仍可作为安全、语义地图的并行路线，但不冒充端到端视觉
+导航。RTAB-Map 为第一条三维验证路线。所有候选按需求择一评估，不同时安装。
 
 ## 4. 分阶段 TODO 与验收门槛
 

@@ -136,3 +136,33 @@ def test_indoor_rviz_uses_map_for_initial_pose_and_named_goals():
     marker = next(display for display in manager['Displays']
                   if display.get('Name') == 'Semantic Approach Poses')
     assert marker['Topic']['Durability Policy'] == 'Transient Local'
+
+
+def test_visual_navigation_launch_supports_record_and_shadow(tmp_path):
+    module = indoor_module('visual_navigation')
+    context = LaunchContext()
+    context.launch_configurations.update(
+        mode='record', dataset=str(tmp_path / 'dataset'), rate='5.0',
+        image_topic='/rgbd/image', teacher_topic='/cmd_vel_smoothed',
+        plan_topic='/plan', model='', metrics=str(tmp_path / 'metrics.json'),
+    )
+    assert module._launch(context)[0].node_executable == 'visual_dataset_recorder'
+    model = tmp_path / 'policy.yml'
+    model.write_text('placeholder', encoding='utf-8')
+    context.launch_configurations.update(mode='shadow', model=str(model))
+    assert module._launch(context)[0].node_executable == 'visual_policy'
+
+
+def test_visual_navigation_launch_rejects_bad_mode_and_model(tmp_path):
+    module = indoor_module('visual_navigation')
+    context = LaunchContext()
+    context.launch_configurations.update(
+        mode='bad', dataset=str(tmp_path), rate='5.0',
+        image_topic='/rgbd/image', teacher_topic='/cmd_vel_smoothed',
+        plan_topic='/plan', model='', metrics=str(tmp_path / 'metrics.json'),
+    )
+    with pytest.raises(ValueError, match='mode'):
+        module._launch(context)
+    context.launch_configurations['mode'] = 'shadow'
+    with pytest.raises(FileNotFoundError, match='does not exist'):
+        module._launch(context)
