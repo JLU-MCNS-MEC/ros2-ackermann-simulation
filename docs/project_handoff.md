@@ -4,6 +4,17 @@
 
 ## 当前可视化会话与最新验收
 
+- 已定位“空旷处路径绕远”：代价地图直线路径代价均为 0，主要原因是 RViz 精确目标
+  朝向与 Ackermann 不能横移、不能原地转向的约束。新增 `/goal_pose_auto` 位置优先
+  入口，自动选择前进或倒车到达朝向；原 `Nav2 Goal` 继续提供精确姿态任务。
+- 在线侧向目标对比中，原路径约 2.592 m，新路径约 1.907 m，缩短约 26%；车辆
+  27.56 s 实际到达，最终距离约 0.299 m。未放宽安全区，未虚假缩小 0.9 m 最小
+  转弯半径。详情见
+  [位置优先目标实验](experiments/position_goal_optimization.md)。
+- 完整系统重启后，入口到中央通道的位置优先导航约 13.4 s 成功、0 恢复。3 包构建
+  与 171 项测试通过，新模块覆盖率 87%。RViz 使用已安装的 `indoor_semantic.rviz`；
+  内嵌 Image 显示在当前显卡驱动下会使 RViz 崩溃，已移除，视觉调试图继续由独立
+  `rqt_image_view` 显示。
 - 已新增目标条件端到端视觉导航 V0：Nav2 示范采集、OpenCV MLP 训练、影子推理、
   误差统计和实时图像叠加。它直接使用 RGB 与相对目标，不使用视觉点云生成控制。
 - 第二批使用唯一老师 `/cmd_vel_smoothed`，5 个目标成功、0 恢复，采集 697 组；
@@ -15,8 +26,8 @@
   [V0 实验记录](experiments/visual_navigation_v0.md)。
 - 仿真、Gazebo GUI 和独立 RViz 继续运行；RGB-D 已开启，AMCL 已初始化。
   自动回归已结束，测试工具不会继续发送目标；用户可在 RViz 中手动设置新目标。
-- 当前主日志：`artifacts/validation/20260910/m1_fixed/launch.log`；
-  RViz 使用 `/tmp/indoor_visual_20260910.rviz`，含已修复的 Navigation 2 面板。
+- 当前运行的是重新构建后的一体仿真、独立 RViz、视觉影子节点和 `rqt_image_view`；
+  AMCL 已初始化，车辆停在中央通道目标附近。主 launch 会话日志位于最新 ROS 日志目录。
 - 控制参数：室内巡航 0.35 m/s，数值静止阈值 1e-6 m/s；进展检查 0.2 m / 15 s，
   BT 动作确认超时 500 ms。所有安全区和 0.8 s 安全源超时保持不变。
 - 新增 `navigation_regression`、固定路线和只读 `rgbd_audit`；桥与两个扫描投影节点

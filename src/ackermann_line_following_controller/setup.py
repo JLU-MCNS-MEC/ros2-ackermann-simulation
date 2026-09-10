@@ -23,6 +23,10 @@ setup(
         'console_scripts': [
             'rgbd_audit = ackermann_line_following_controller.rgbd_audit:main',
             (
+                'goal_pose_optimizer = '
+                'ackermann_line_following_controller.goal_pose_optimizer:main'
+            ),
+            (
                 'visual_dataset_recorder = '
                 'ackermann_line_following_controller.visual_dataset_recorder:main'
             ),

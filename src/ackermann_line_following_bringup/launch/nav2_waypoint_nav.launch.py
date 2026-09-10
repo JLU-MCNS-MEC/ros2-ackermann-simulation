@@ -320,6 +320,22 @@ def generate_launch_description() -> LaunchDescription:
         ],
     )
 
+    goal_pose_optimizer = Node(
+        package='ackermann_line_following_controller',
+        executable='goal_pose_optimizer',
+        name='goal_pose_optimizer',
+        output='screen',
+        parameters=[
+            {
+                'use_sim_time': True,
+                'input_topic': '/goal_pose_auto',
+                'output_topic': '/goal_pose',
+                'base_frame': 'base_footprint',
+                'allow_reverse': LaunchConfiguration('allow_reversing'),
+            }
+        ],
+    )
+
     rviz = Node(
         condition=IfCondition(LaunchConfiguration('use_rviz')),
         package='rviz2',
@@ -462,6 +478,7 @@ def generate_launch_description() -> LaunchDescription:
             chassis_adapter,
             lidar_ground_filter,
             navigation,
+            goal_pose_optimizer,
             route_sender,
             diagnostics,
             rviz,

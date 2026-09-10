@@ -130,12 +130,25 @@ def test_indoor_rviz_uses_map_for_initial_pose_and_named_goals():
     manager = config['Visualization Manager']
     assert manager['Global Options']['Fixed Frame'] == 'map'
     assert any(tool['Class'] == 'nav2_rviz_plugins/GoalTool' for tool in manager['Tools'])
+    position_goal = next(
+        tool for tool in manager['Tools']
+        if tool['Class'] == 'rviz_default_plugins/SetGoal'
+    )
+    assert position_goal['Topic'] == '/goal_pose_auto'
     # GoalTool emits a Qt signal; the Nav2 panel owns the action client.
     assert any(panel['Class'] == 'nav2_rviz_plugins/Navigation 2'
                for panel in config['Panels'])
     marker = next(display for display in manager['Displays']
                   if display.get('Name') == 'Semantic Approach Poses')
     assert marker['Topic']['Durability Policy'] == 'Transient Local'
+
+
+def test_navigation_launch_adds_position_first_goal_adapter():
+    text = (ROOT / 'launch' / 'nav2_waypoint_nav.launch.py').read_text()
+    assert "executable='goal_pose_optimizer'" in text
+    assert "'input_topic': '/goal_pose_auto'" in text
+    assert "'output_topic': '/goal_pose'" in text
+    assert "'allow_reverse': LaunchConfiguration('allow_reversing')" in text
 
 
 def test_visual_navigation_launch_supports_record_and_shadow(tmp_path):

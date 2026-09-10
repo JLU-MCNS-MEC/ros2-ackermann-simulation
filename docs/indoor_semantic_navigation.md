@@ -15,6 +15,15 @@ ros2 launch ackermann_line_following_bringup indoor_semantic.launch.py use_rviz:
 演示地图来自实际 SLAM；演示目标来自定位后人工记录的停靠位姿。
 无桌面环境时省略 `use_rviz:=true`，通过 `/initialpose` 提供粗略位姿。
 
+### RViz 中手动设置目标
+
+- 普通点到点导航使用工具栏的 `2D Goal Pose`。它发布到 `/goal_pose_auto`，系统会根据
+  车辆当前位置自动选择前进或倒车的到达朝向，减少空旷区域内仅由终点朝向造成的大弧线。
+- 需要精确控制最终车头朝向时使用 `Nav2 Goal`。这是完整位姿目标；受 Ackermann
+  最小转弯半径限制，即使没有障碍也可能先绕出一段调整车身。
+
+位置优先适配器只修改终点朝向，不修改目标位置、障碍代价、安全区或车辆物理转弯半径。
+
 ## 1. 在线建图
 
 ```bash
