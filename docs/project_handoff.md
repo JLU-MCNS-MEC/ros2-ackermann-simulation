@@ -2,6 +2,15 @@
 
 更新时间：2026-09-10。
 
+## 当前可视化会话
+
+- 已在桌面 `:1` 启动 Gazebo GUI、室内语义导航与 RViz，供用户直接观察。
+- AMCL 已接收粗略初始位姿；“办公区”目标实际成功到达。
+- 本次已观察到 Gazebo 三维场景及 RViz 车辆、点云与代价地图。临时展示配置
+  `/tmp/indoor_visual_20260910.rviz` 使用更远俯视视角并隐藏未启用的 RGB-D 面板。
+- 演示保持运行；主日志 `/tmp/indoor_visual_demo.log`，Gazebo GUI 日志
+  `/tmp/indoor_visual_gazebo.log`，独立 RViz 日志 `/tmp/indoor_visual_rviz.log`。
+
 ## 当前开发：100 平方米语义导航
 
 - 功能分支：`feature/semantic-navigation-100sqm`；完整清单见
