@@ -1,0 +1,611 @@
+{
+  "date": "2026-09-10",
+  "code_commit": "2318d5b",
+  "scope": "Simulation RGB-D transport/geometry quality; not real-camera calibration or semantic recognition",
+  "initial_best_effort": {
+    "passed": false,
+    "gates": {
+      "enough_samples": false,
+      "valid_pairs": true,
+      "acquisition_tf": false,
+      "sync_p95_le_20ms": true,
+      "depth_valid_median_ge_10pct": true,
+      "matching_ge_90pct": false,
+      "all_streams_present": true,
+      "monotonic_stamps": true,
+      "receipt_gaps_le_500ms": false
+    },
+    "matched_samples": 274,
+    "tf_valid_samples": 267,
+    "errors": {
+      "pending_at_end": 0
+    },
+    "sync_p95_s": 0.0,
+    "median_valid_depth_fraction": 0.6311783854166667,
+    "sensor_health": {
+      "camera_info": {
+        "count": 1670,
+        "first_wall": 158483.661196972,
+        "last_wall": 158603.307751356,
+        "first_stamp": 26.466,
+        "last_stamp": 136.62,
+        "max_wall_gap_s": 0.10095422601443715,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 13.949419676921007,
+        "sensor_rate_hz": 15.151515151515152,
+        "last_receipt_age_s": 0.058205785986501724
+      },
+      "rgb": {
+        "count": 520,
+        "first_wall": 158483.704644378,
+        "last_wall": 158603.350758034,
+        "first_stamp": 26.466,
+        "last_stamp": 136.62,
+        "max_wall_gap_s": 1.9393896060064435,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 4.337792379050604,
+        "sensor_rate_hz": 4.711585598344136,
+        "last_receipt_age_s": 0.01519910799106583
+      },
+      "depth": {
+        "count": 734,
+        "first_wall": 158483.805517648,
+        "last_wall": 158603.114518244,
+        "first_stamp": 26.598,
+        "last_stamp": 136.422,
+        "max_wall_gap_s": 0.9261097789858468,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 6.143710837726987,
+        "sensor_rate_hz": 6.674315268065268,
+        "last_receipt_age_s": 0.25143889800528996
+      }
+    },
+    "camera": {
+      "width": 640,
+      "height": 480,
+      "k": [
+        462.2663372707335,
+        0.0,
+        320.0,
+        0.0,
+        462.26633727073346,
+        240.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "d": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "distortion_model": "plumb_bob",
+      "frame_id": "rgbd_optical_frame",
+      "depth_encoding": "32FC1"
+    },
+    "wall_duration_s": 120.00053534898325,
+    "invalid_tf_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "fixed_stationary": {
+    "passed": true,
+    "gates": {
+      "enough_samples": true,
+      "valid_pairs": true,
+      "acquisition_tf": true,
+      "sync_p95_le_20ms": true,
+      "depth_valid_median_ge_10pct": true,
+      "matching_ge_90pct": true,
+      "all_streams_present": true,
+      "monotonic_stamps": true,
+      "receipt_gaps_le_500ms": true
+    },
+    "matched_samples": 1658,
+    "tf_valid_samples": 1644,
+    "errors": {
+      "pending_at_end": 0
+    },
+    "sync_p95_s": 0.0,
+    "median_valid_depth_fraction": 0.6311783854166667,
+    "sensor_health": {
+      "rgb": {
+        "count": 1660,
+        "first_wall": 158791.143548647,
+        "last_wall": 158909.520376602,
+        "first_stamp": 23.496,
+        "last_stamp": 132.99,
+        "max_wall_gap_s": 0.3621951479872223,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.014567113003496,
+        "sensor_rate_hz": 15.151515151515149,
+        "last_receipt_age_s": 0.053691559995058924
+      },
+      "depth": {
+        "count": 1660,
+        "first_wall": 158791.150752031,
+        "last_wall": 158909.501799587,
+        "first_stamp": 23.496,
+        "last_stamp": 132.99,
+        "max_wall_gap_s": 0.39735330900293775,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.01761990501499,
+        "sensor_rate_hz": 15.151515151515149,
+        "last_receipt_age_s": 0.07226857502246276
+      },
+      "camera_info": {
+        "count": 1659,
+        "first_wall": 158791.182292306,
+        "last_wall": 158909.558405661,
+        "first_stamp": 23.496,
+        "last_stamp": 133.056,
+        "max_wall_gap_s": 0.4950651800027117,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.006204064396046,
+        "sensor_rate_hz": 15.133260313983204,
+        "last_receipt_age_s": 0.015662501013139263
+      }
+    },
+    "camera": {
+      "width": 640,
+      "height": 480,
+      "k": [
+        462.2663372707335,
+        0.0,
+        320.0,
+        0.0,
+        462.26633727073346,
+        240.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "d": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "distortion_model": "plumb_bob",
+      "frame_id": "rgbd_optical_frame",
+      "depth_encoding": "32FC1"
+    },
+    "reliable": true,
+    "wall_duration_s": 120.00292606497533,
+    "invalid_tf_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ]
+  },
+  "fixed_moving": {
+    "passed": true,
+    "gates": {
+      "enough_samples": true,
+      "valid_pairs": true,
+      "acquisition_tf": true,
+      "sync_p95_le_20ms": true,
+      "frame_age_p95_le_200ms": true,
+      "no_future_frames": true,
+      "depth_valid_median_ge_10pct": true,
+      "matching_ge_90pct": true,
+      "all_streams_present": true,
+      "monotonic_stamps": true,
+      "receipt_gaps_le_500ms": true
+    },
+    "matched_samples": 1667,
+    "tf_valid_samples": 1654,
+    "errors": {
+      "pending_at_end": 0
+    },
+    "sync_p95_s": 0.0,
+    "frame_age_p95_s": 0.062,
+    "median_valid_depth_fraction": 0.8533528645833334,
+    "sensor_health": {
+      "depth": {
+        "count": 1669,
+        "first_wall": 158935.413361148,
+        "last_wall": 159053.391782262,
+        "first_stamp": 156.75,
+        "last_stamp": 266.838,
+        "max_wall_gap_s": 0.12687773400102742,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.138178696154544,
+        "sensor_rate_hz": 15.151515151515149,
+        "last_receipt_age_s": 0.06668386899400502
+      },
+      "camera_info": {
+        "count": 1669,
+        "first_wall": 158935.451238341,
+        "last_wall": 159053.45235781,
+        "first_stamp": 156.816,
+        "last_stamp": 266.904,
+        "max_wall_gap_s": 0.12529674000688829,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.135459116878794,
+        "sensor_rate_hz": 15.151515151515152,
+        "last_receipt_age_s": 0.006108321016654372
+      },
+      "rgb": {
+        "count": 1667,
+        "first_wall": 158935.559494324,
+        "last_wall": 159053.424605163,
+        "first_stamp": 156.882,
+        "last_stamp": 266.838,
+        "max_wall_gap_s": 0.12673464298131876,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 14.134801962523513,
+        "sensor_rate_hz": 15.151515151515149,
+        "last_receipt_age_s": 0.033860968018416315
+      }
+    },
+    "camera": {
+      "width": 640,
+      "height": 480,
+      "k": [
+        462.2663372707335,
+        0.0,
+        320.0,
+        0.0,
+        462.26633727073346,
+        240.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "d": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "distortion_model": "plumb_bob",
+      "frame_id": "rgbd_optical_frame",
+      "depth_encoding": "32FC1"
+    },
+    "reliable": true,
+    "wall_duration_s": 120.00239610599237,
+    "invalid_tf_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  "navigation": {
+    "requested_trials": 5,
+    "completed_trials": 5,
+    "successes": 5,
+    "success_rate_of_requested": 1.0,
+    "complete": true,
+    "all_passed": true,
+    "median_wall_duration_s": 28.7262680339918,
+    "p95_wall_duration_s": 37.476262612006394,
+    "recovery_count": 0,
+    "trials": [
+      {
+        "scenario": "indoor_regression",
+        "outcome": "SUCCEEDED",
+        "success": true,
+        "duration_s": 16.40702669302118,
+        "sample_count": 162,
+        "effective_sample_rate_hz": 9.873818275002112,
+        "time_to_first_command_s": 0.11425494501600042,
+        "time_to_first_motion_s": 0.21461298302165233,
+        "distance_travelled_m": 4.339004874342067,
+        "mean_abs_cross_track_error_m": 0.010531788049795926,
+        "max_abs_cross_track_error_m": 0.05501708774810251,
+        "speed_tracking_rmse_mps": 0.015450556889190422,
+        "max_measured_speed_mps": 0.3535592056029359,
+        "mean_measured_speed_mps": 0.28838320179227717,
+        "minimum_front_clearance_m": 2.99674391746521,
+        "minimum_nearest_clearance_m": 1.4656007289886475,
+        "final_goal_distance_m": 0.11786230000783915,
+        "decision_transition_count": 0,
+        "decision_sample_counts": {
+          "CLEAR": 162,
+          "STOP": 0,
+          "SLOWDOWN": 0,
+          "APPROACH": 0,
+          "LIMIT": 0
+        },
+        "index": 1,
+        "goal": {
+          "name": "corridor",
+          "pose": [
+            4.0,
+            1.75,
+            0.0
+          ]
+        },
+        "recoveries": 0,
+        "wall_duration_s": 16.407259143015835,
+        "sim_duration_s": 15.122000000000014,
+        "reverse_fraction_of_moving_samples": 0.018633540372670808,
+        "diagnostic_samples": 162
+      },
+      {
+        "scenario": "indoor_regression",
+        "outcome": "SUCCEEDED",
+        "success": true,
+        "duration_s": 28.725933762994828,
+        "sample_count": 285,
+        "effective_sample_rate_hz": 9.92134850520129,
+        "time_to_first_command_s": 0.10448139198706485,
+        "time_to_first_motion_s": 0.10448139198706485,
+        "distance_travelled_m": 3.9382847304787565,
+        "mean_abs_cross_track_error_m": 0.022274350963873073,
+        "max_abs_cross_track_error_m": 0.08639830084422355,
+        "speed_tracking_rmse_mps": 0.00398879801051813,
+        "max_measured_speed_mps": 0.1531595818486309,
+        "mean_measured_speed_mps": 0.149096918486194,
+        "minimum_front_clearance_m": 3.205899953842163,
+        "minimum_nearest_clearance_m": 1.6100367307662964,
+        "final_goal_distance_m": 0.25418045852598903,
+        "decision_transition_count": 0,
+        "decision_sample_counts": {
+          "CLEAR": 285,
+          "STOP": 0,
+          "SLOWDOWN": 0,
+          "APPROACH": 0,
+          "LIMIT": 0
+        },
+        "index": 2,
+        "goal": {
+          "name": "entrance",
+          "pose": [
+            0.18,
+            0.19,
+            0.0
+          ]
+        },
+        "recoveries": 0,
+        "wall_duration_s": 28.7262680339918,
+        "sim_duration_s": 26.488,
+        "reverse_fraction_of_moving_samples": 0.9964788732394366,
+        "diagnostic_samples": 285
+      },
+      {
+        "scenario": "indoor_regression",
+        "outcome": "SUCCEEDED",
+        "success": true,
+        "duration_s": 20.30596854898613,
+        "sample_count": 202,
+        "effective_sample_rate_hz": 9.947814087897116,
+        "time_to_first_command_s": 0.10719641199102625,
+        "time_to_first_motion_s": 0.10719641199102625,
+        "distance_travelled_m": 5.353644964798239,
+        "mean_abs_cross_track_error_m": 0.01802820930913324,
+        "max_abs_cross_track_error_m": 0.06639376153167965,
+        "speed_tracking_rmse_mps": 0.022386670631030142,
+        "max_measured_speed_mps": 0.3510970580662675,
+        "mean_measured_speed_mps": 0.2862048557418491,
+        "minimum_front_clearance_m": 1.4629089832305908,
+        "minimum_nearest_clearance_m": 0.8005922436714172,
+        "final_goal_distance_m": 0.1602582428460841,
+        "decision_transition_count": 0,
+        "decision_sample_counts": {
+          "CLEAR": 202,
+          "STOP": 0,
+          "SLOWDOWN": 0,
+          "APPROACH": 0,
+          "LIMIT": 0
+        },
+        "index": 3,
+        "goal": {
+          "name": "office",
+          "pose": [
+            -0.37,
+            5.12,
+            1.57
+          ]
+        },
+        "recoveries": 0,
+        "wall_duration_s": 20.306395308987703,
+        "sim_duration_s": 18.775000000000006,
+        "reverse_fraction_of_moving_samples": 0.024752475247524754,
+        "diagnostic_samples": 202
+      },
+      {
+        "scenario": "indoor_regression",
+        "outcome": "SUCCEEDED",
+        "success": true,
+        "duration_s": 37.47598045799532,
+        "sample_count": 372,
+        "effective_sample_rate_hz": 9.926358041971804,
+        "time_to_first_command_s": 0.20958588100620545,
+        "time_to_first_motion_s": 0.10867919999873266,
+        "distance_travelled_m": 7.5089568808760605,
+        "mean_abs_cross_track_error_m": 0.016948987105769857,
+        "max_abs_cross_track_error_m": 0.0747084287776171,
+        "speed_tracking_rmse_mps": 0.030042811780164234,
+        "max_measured_speed_mps": 0.3520104751960322,
+        "mean_measured_speed_mps": 0.21269784743654535,
+        "minimum_front_clearance_m": 0.9016379714012146,
+        "minimum_nearest_clearance_m": 0.7998539805412292,
+        "final_goal_distance_m": 0.29387446724667193,
+        "decision_transition_count": 2,
+        "decision_sample_counts": {
+          "CLEAR": 343,
+          "STOP": 0,
+          "SLOWDOWN": 29,
+          "APPROACH": 0,
+          "LIMIT": 0
+        },
+        "index": 4,
+        "goal": {
+          "name": "south_east",
+          "pose": [
+            4.44,
+            1.46,
+            0.0
+          ]
+        },
+        "recoveries": 0,
+        "wall_duration_s": 37.476262612006394,
+        "sim_duration_s": 35.14099999999999,
+        "reverse_fraction_of_moving_samples": 0.3736559139784946,
+        "diagnostic_samples": 372
+      },
+      {
+        "scenario": "indoor_regression",
+        "outcome": "SUCCEEDED",
+        "success": true,
+        "duration_s": 30.97610564698698,
+        "sample_count": 308,
+        "effective_sample_rate_hz": 9.943147906004087,
+        "time_to_first_command_s": 0.10698378999950364,
+        "time_to_first_motion_s": 0.10698378999950364,
+        "distance_travelled_m": 4.366010213605735,
+        "mean_abs_cross_track_error_m": 0.01745910656351007,
+        "max_abs_cross_track_error_m": 0.07285698546750256,
+        "speed_tracking_rmse_mps": 0.011239681249493953,
+        "max_measured_speed_mps": 0.3500678308223568,
+        "mean_measured_speed_mps": 0.14949560937424644,
+        "minimum_front_clearance_m": 3.2056150436401367,
+        "minimum_nearest_clearance_m": 1.6354652643203735,
+        "final_goal_distance_m": 0.2624741808525317,
+        "decision_transition_count": 0,
+        "decision_sample_counts": {
+          "CLEAR": 308,
+          "STOP": 0,
+          "SLOWDOWN": 0,
+          "APPROACH": 0,
+          "LIMIT": 0
+        },
+        "index": 5,
+        "goal": {
+          "name": "entrance_repeat",
+          "pose": [
+            0.18,
+            0.19,
+            0.0
+          ]
+        },
+        "recoveries": 0,
+        "wall_duration_s": 30.976326331991004,
+        "sim_duration_s": 29.337999999999994,
+        "reverse_fraction_of_moving_samples": 0.9902597402597403,
+        "diagnostic_samples": 308
+      }
+    ],
+    "sensor_health": {
+      "/imu/data_raw": {
+        "count": 12576,
+        "first_wall": 158935.37176246,
+        "last_wall": 159070.391810173,
+        "first_stamp": 156.96,
+        "last_stamp": 282.96,
+        "max_wall_gap_s": 0.34240269800648093,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 93.13431755505714,
+        "sensor_rate_hz": 99.80158730158732,
+        "last_receipt_age_s": 0.009689958998933434
+      },
+      "/scan_nav": {
+        "count": 1257,
+        "first_wall": 158935.452428692,
+        "last_wall": 159070.338587811,
+        "first_stamp": 157.1,
+        "last_stamp": 282.9,
+        "max_wall_gap_s": 0.37637801899109036,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 9.311555820132172,
+        "sensor_rate_hz": 9.984101748807632,
+        "last_receipt_age_s": 0.06291232098010369
+      },
+      "/odometry/filtered": {
+        "count": 3773,
+        "first_wall": 158935.461333772,
+        "last_wall": 159070.36677483,
+        "first_stamp": 157.1,
+        "last_stamp": 282.93,
+        "max_wall_gap_s": 0.3452990950027015,
+        "nonmonotonic_stamps": 0,
+        "wall_rate_hz": 27.960325176046197,
+        "sensor_rate_hz": 29.97695303186839,
+        "last_receipt_age_s": 0.034725301986327395
+      }
+    },
+    "manual_interventions": "not automatically observable",
+    "clearance_definition": "scan origin range, not body clearance"
+  },
+  "extrinsic_check": {
+    "passed": true,
+    "source": "URDF static TF consistency, not measured hardware calibration",
+    "base_link_to_optical_translation_m": [
+      0.36,
+      0,
+      0.25
+    ],
+    "optical_z_in_base": [
+      1,
+      0,
+      0
+    ],
+    "optical_x_in_base": [
+      0,
+      -1,
+      0
+    ],
+    "optical_y_in_base": [
+      0,
+      0,
+      -1
+    ]
+  },
+  "fixed_bag_scan_delivery": {
+    "scan_points": {
+      "count": 2898,
+      "stamp_rate_hz": 10.0,
+      "max_stamp_gap_s": 0.1
+    },
+    "scan_nav": {
+      "count": 2896,
+      "stamp_rate_hz": 9.993096306523992,
+      "max_stamp_gap_s": 0.3
+    },
+    "scan_slam": {
+      "count": 2868,
+      "stamp_rate_hz": 9.896444597859855,
+      "max_stamp_gap_s": 0.5
+    }
+  },
+  "local_artifact_directory": "artifacts/validation/20260910/m1_fixed",
+  "limitations": [
+    "Static audit preceded addition of frame-age gates; moving audit includes them",
+    "TF misses occurred only in initial 13/14 samples while buffer populated",
+    "Five navigation goals are not a new 20-run stability acceptance",
+    "Real extrinsic/depth calibration and visual semantics remain unimplemented"
+  ]
+}

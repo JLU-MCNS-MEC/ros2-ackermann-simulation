@@ -1,0 +1,94 @@
+{
+  "requested_trials": 20,
+  "completed_trials": 1,
+  "successes": 0,
+  "success_rate_of_requested": 0.0,
+  "complete": false,
+  "all_passed": false,
+  "median_wall_duration_s": 21.02951212201151,
+  "p95_wall_duration_s": 21.02951212201151,
+  "recovery_count": 1,
+  "trials": [
+    {
+      "scenario": "indoor_regression",
+      "outcome": "FAILED",
+      "success": false,
+      "duration_s": 21.02931758700288,
+      "sample_count": 208,
+      "effective_sample_rate_hz": 9.890953386359714,
+      "time_to_first_command_s": 0.36951058299746364,
+      "time_to_first_motion_s": 0.36951058299746364,
+      "distance_travelled_m": 2.283404508711614,
+      "mean_abs_cross_track_error_m": 0.011027599864772518,
+      "max_abs_cross_track_error_m": 0.05844201995578345,
+      "speed_tracking_rmse_mps": 0.02376396878458992,
+      "max_measured_speed_mps": 0.2866450329097764,
+      "mean_measured_speed_mps": 0.11451947468508861,
+      "minimum_front_clearance_m": 0.8559415340423584,
+      "minimum_nearest_clearance_m": 0.7066060304641724,
+      "final_goal_distance_m": 4.929976214903803,
+      "decision_transition_count": 5,
+      "decision_sample_counts": {
+        "CLEAR": 151,
+        "STOP": 0,
+        "SLOWDOWN": 57,
+        "APPROACH": 0,
+        "LIMIT": 0
+      },
+      "index": 1,
+      "goal": {
+        "name": "corridor",
+        "pose": [
+          4.0,
+          1.75,
+          0.0
+        ]
+      },
+      "recoveries": 1,
+      "wall_duration_s": 21.02951212201151,
+      "sim_duration_s": 20.388999999999896,
+      "reverse_fraction_of_moving_samples": 0.7087378640776699,
+      "diagnostic_samples": 208
+    }
+  ],
+  "sensor_health": {
+    "/scan_nav": {
+      "count": 133,
+      "first_wall": 157441.707622906,
+      "last_wall": 157462.566241929,
+      "first_stamp": 1333.5,
+      "last_stamp": 1354.0,
+      "max_wall_gap_s": 0.7252886939968448,
+      "nonmonotonic_stamps": 0,
+      "wall_rate_hz": 6.328319236017549,
+      "sensor_rate_hz": 6.439024390243903,
+      "last_receipt_age_s": 0.37910940300207585
+    },
+    "/imu/data_raw": {
+      "count": 2057,
+      "first_wall": 157441.72762352,
+      "last_wall": 157462.870240565,
+      "first_stamp": 1333.53,
+      "last_stamp": 1354.09,
+      "max_wall_gap_s": 0.23556165100308135,
+      "nonmonotonic_stamps": 0,
+      "wall_rate_hz": 97.24434754808514,
+      "sensor_rate_hz": 100.00000000000027,
+      "last_receipt_age_s": 0.07511076697846875
+    },
+    "/odometry/filtered": {
+      "count": 615,
+      "first_wall": 157441.808514217,
+      "last_wall": 157462.865288736,
+      "first_stamp": 1333.6,
+      "last_stamp": 1354.06,
+      "max_wall_gap_s": 0.2747201760066673,
+      "nonmonotonic_stamps": 0,
+      "wall_rate_hz": 29.15926175900359,
+      "sensor_rate_hz": 30.00977517106544,
+      "last_receipt_age_s": 0.08006259598187171
+    }
+  },
+  "manual_interventions": "not automatically observable",
+  "clearance_definition": "scan origin range, not body clearance"
+}

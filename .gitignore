@@ -6,6 +6,9 @@ build-*/
 install-*/
 log-*/
 
+# Local validation bags and runtime snapshots (summaries live under docs/).
+/artifacts/validation/
+
 # Python generated files
 __pycache__/
 *.py[cod]
